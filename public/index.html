@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+
+	<title>Svelte app</title>
+
+	<link rel='icon' type='image/png' href='/favicon.png'>
+	<link rel='stylesheet' href='/global.css'>
+	<link rel='stylesheet' href='/build/bundle.css'>
+
+	<!-- <script defer src='/build/bundle.js' data-config='{"selector":"#main"}'></script> -->
+	<script defer src='/build/bundle.js'></script>
+</head>
+
+<body>
+	<h1>Svelte App</h1>
+	<div id="main">
+		
+	</div>
+
+	<script type="module">
+		new FormJS({
+			selector:'#main',
+			forms: [{
+				fields:[{
+					id: 'cloud_platform',
+					type:'select',
+					// label: 'First name',
+					placeholder: 'Choose a Cloud platform',
+					values: [
+						'AWS',
+						'Google Cloud',
+						'Both AWS and Google Cloud'
+					],
+					style: {
+						col_md: 12,
+						col_lg: 6,  
+					}
+				}, {
+					id: 'full_name',
+					type:'text',
+					// label: 'First name',
+					placeholder: 'Enter your full name',
+					style: {
+						col_md: 12,
+						col_lg: 6,  
+					}
+				}, {
+					id: 'email',
+					type:'email',
+					// label: 'Email',
+					placeholder: 'Enter your email',
+					style: {
+						col_md: 12,
+						col_lg: 6,  
+					}
+				}, {
+					id: 'city',
+					type:'select',
+					// label: 'Last name',
+					placeholder: 'Choose a city',
+					values:[
+						'Sydney',
+						'Singapore',
+						'Los Angeles'
+					],
+					style: {
+						col_md: 12,
+						col_lg: 6,  
+					}
+				}, {
+					id: 'message',
+					type:'textarea',
+					// label: 'Email',
+					placeholder: 'Type your enquiry details here',
+					style: {
+						col_md: 12,
+						col_lg: 6,  
+					}
+				}, {
+					id: 'submit',
+					type:'button',
+					label: 'Submit'
+				}]
+			}]
+		})
+	</script>
+</body>
+</html>
