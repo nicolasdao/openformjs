@@ -1,6 +1,7 @@
 {
   "name": "openform",
   "version": "0.0.1",
+  "description": "Front-end JS package that helps building forms.",
   "main": "src/main.js",
   "files": [
     "public/build"

@@ -1,5 +1,5 @@
 # OpenformJS &middot; [![Tests](https://travis-ci.org/nicolasdao/openform.svg?branch=master)](https://travis-ci.org/nicolasdao/openform) [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-__*Openform*__ is a front-end JS package that helps building forms. 
+__*Openform*__ is a front-end JS package that helps building forms. It is built using Svelte 3.0.
 
 # Table of contents
 
