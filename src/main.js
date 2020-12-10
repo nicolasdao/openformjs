@@ -1,8 +1,11 @@
 import App from './App.svelte'
 
-if (document && !document.currentScript)
-	document.currentScript = (function() {
-		var scripts = document.getElementsByTagName('script')
+const Doc = (typeof document !== 'undefined') ? document : null
+const Win = (typeof window !== 'undefined') ? window : null
+
+if (Doc && !Doc.currentScript)
+	Doc.currentScript = (function() {
+		var scripts = Doc.getElementsByTagName('script')
 		return scripts[scripts.length - 1]
 	})()
 
@@ -10,11 +13,11 @@ class FormJS extends App {
 	constructor(config) {
 		let { selector, forms, node } = config || {}
 
-		if (!document && !node)
-			throw new Error('Missing required \'config.node\'. When \'document\' is undefined, \'config.node\' is required.')
+		if (!Doc && !node)
+			throw new Error('Missing required \'config.node\'. When \'Doc\' is undefined, \'config.node\' is required.')
 
-		const el = node || (selector ? document.querySelector(selector) : null) || document.body
-		
+		const el = node || (selector ? Doc.querySelector(selector) : null) || Doc.body
+
 		super({
 			target: el,
 			props: {
@@ -25,7 +28,7 @@ class FormJS extends App {
 	}
 }
 
-const configString = document.currentScript.getAttribute('data-config') || null 
+const configString = (Doc ? Doc.currentScript.getAttribute('data-config') : null) || null 
 let config
 if (configString) {
 	try {
@@ -38,9 +41,9 @@ if (configString) {
 
 const formJS = config ? new FormJS(config) : null
 
-if (window) {
-	window.FormJS = FormJS
-	window.formJS = formJS
+if (Win) {
+	Win.FormJS = FormJS
+	Win.formJS = formJS
 }
 
 export {

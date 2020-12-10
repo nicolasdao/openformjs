@@ -39,7 +39,7 @@ export default {
 		file: pkg.main
 	}, { 
 		file: pkg.module, 
-		format: 'es' 
+		format: 'es'
 	}],
 	plugins: [
 		svelte({
