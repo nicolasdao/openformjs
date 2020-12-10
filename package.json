@@ -1,6 +1,6 @@
 {
   "name": "openform",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Front-end JS package that helps building forms.",
   "main": "public/build/bundle.js",
   "module": "public/build/bundle.mjs",
