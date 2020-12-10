@@ -1,6 +1,6 @@
 import App from './App.svelte'
 
-if (!document.currentScript)
+if (document && !document.currentScript)
 	document.currentScript = (function() {
 		var scripts = document.getElementsByTagName('script')
 		return scripts[scripts.length - 1]
@@ -8,8 +8,13 @@ if (!document.currentScript)
 
 class FormJS extends App {
 	constructor(config) {
-		const { selector, forms } = config || {}
-		const el = (selector ? document.querySelector(selector) : null) || document.body
+		let { selector, forms, node } = config || {}
+
+		if (!document && !node)
+			throw new Error('Missing required \'config.node\'. When \'document\' is undefined, \'config.node\' is required.')
+
+		const el = node || (selector ? document.querySelector(selector) : null) || document.body
+		
 		super({
 			target: el,
 			props: {

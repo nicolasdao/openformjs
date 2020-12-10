@@ -3,9 +3,24 @@ __*Openform*__ is a front-end JS package that helps building forms. It is built 
 
 # Table of contents
 
+> * [Getting started](#getting-started)
+>	- [Install](#install)
 > * [Dev](#dev)
 >	- [Run locally](#run-locally)
 >	- [Deploy](#deploy)
+
+# Getting started
+## Install
+### Browser
+
+```html
+<script defer src="https://cdn.jsdelivr.net/npm/openform/public/build/bundle.js" />
+```
+
+> To install a specific version:
+> ```html
+> <script defer src="https://cdn.jsdelivr.net/npm/openform@0.0.1/public/build/bundle.js" />
+> ```
 
 # Dev
 ## Run locally

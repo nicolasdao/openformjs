@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import json from '@rollup/plugin-json';
+const pkg = require('./package.json')
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -31,12 +32,15 @@ function serve() {
 
 export default {
 	input: 'src/main.js',
-	output: {
+	output: [{
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: 'public/build/bundle.js'
-	},
+		file: pkg.main
+	}, { 
+		file: pkg.module, 
+		format: 'es' 
+	}],
 	plugins: [
 		svelte({
 			compilerOptions: {
