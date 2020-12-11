@@ -2,8 +2,7 @@
   "name": "openform",
   "version": "0.0.5",
   "description": "Front-end JS package that helps building forms.",
-  "main": "public/build/server",
-  "module": "public/build/bundle.mjs",
+  "main": "public/build/bundle.mjs",
   "jsdelivr": "public/build/bundle.js",
   "files": [
     "public/build"

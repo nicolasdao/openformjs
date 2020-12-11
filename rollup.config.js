@@ -1,33 +1,33 @@
-import svelte from 'rollup-plugin-svelte';
-import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
-import livereload from 'rollup-plugin-livereload';
-import { terser } from 'rollup-plugin-terser';
-import css from 'rollup-plugin-css-only';
-import json from '@rollup/plugin-json';
-const pkg = require('./package.json')
+import svelte from 'rollup-plugin-svelte'
+import commonjs from '@rollup/plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import livereload from 'rollup-plugin-livereload'
+import { terser } from 'rollup-plugin-terser'
+import css from 'rollup-plugin-css-only'
+import json from '@rollup/plugin-json'
+import pkg from './package.json'
 
-const production = !process.env.ROLLUP_WATCH;
+const production = !process.env.ROLLUP_WATCH
 
 function serve() {
-	let server;
+	let server
 
 	function toExit() {
-		if (server) server.kill(0);
+		if (server) server.kill(0)
 	}
 
 	return {
 		writeBundle() {
-			if (server) return;
+			if (server) return
 			server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
 				stdio: ['ignore', 'inherit', 'inherit'],
 				shell: true
-			});
+			})
 
-			process.on('SIGTERM', toExit);
-			process.on('exit', toExit);
+			process.on('SIGTERM', toExit)
+			process.on('exit', toExit)
 		}
-	};
+	}
 }
 
 export default {
@@ -36,9 +36,9 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: pkg.main
+		file: pkg.jsdelivr
 	}, { 
-		file: pkg.module, 
+		file: pkg.main, 
 		format: 'es'
 	}],
 	plugins: [
@@ -79,4 +79,4 @@ export default {
 	watch: {
 		clearScreen: false
 	}
-};
+}
