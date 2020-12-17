@@ -5,6 +5,8 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 import json from '@rollup/plugin-json'
+import preprocess from 'svelte-preprocess'
+import postcss from 'rollup-plugin-postcss'
 import pkg from './package.json'
 
 const production = !process.env.ROLLUP_WATCH
@@ -43,6 +45,7 @@ export default {
 	}],
 	plugins: [
 		svelte({
+			preprocess: preprocess(),
 			compilerOptions: {
 				// enable run-time checks when not in production
 				dev: !production
@@ -63,6 +66,18 @@ export default {
 		}),
 		commonjs(),
 		json(),
+		postcss({
+			extract: true,
+			minimize: true,
+			use: [
+				['sass', {
+					includePaths: [
+						'./theme',
+						'./node_modules'
+					]
+				}]
+			]
+		}),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
