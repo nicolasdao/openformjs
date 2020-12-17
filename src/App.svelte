@@ -59,10 +59,12 @@
 
 <div {id} data-widget="formjs" data-version={version}>
 	{#each forms as form}
-		<Form fields={getComponentFields(form)}></Form>
+		<Form class="hello-nic" fields={getComponentFields(form)}></Form>
 	{/each}
 </div>
 
-<style>
-
+<style type="text/scss">
+	.hello-nic {
+		padding: 0px;
+	}
 </style>
