@@ -8,83 +8,196 @@
 
 	<link rel='icon' type='image/png' href='/favicon.png'>
 	<link rel='stylesheet' href='/build/bundle.css'>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 	<!-- <script defer src='/build/bundle.js' data-config='{"selector":"#main"}'></script> -->
 	<script defer src='/build/bundle.js'></script>
 </head>
 
 <body>
-	<h1>Svelte App</h1>
-	<div id="main">
-		
+	<div id="main" class="mt-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm">
+					<h3 class="mb-4">Text fields</h3>
+					<div id="text-field"></div>
+				</div>
+				<div class="col-sm">
+					<h3 class="mb-4">Select</h3>
+					<div id="select"></div>
+				</div>
+				<div class="col-sm">
+					<h3 class="mb-4">Checkboxes</h3>
+					<div id="checkboxes"></div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<script type="module">
-		new FormJS({
-			selector:'#main',
-			forms: [{
-				fields:[{
-					id: 'cloud_platform',
-					type:'select',
-					// label: 'First name',
-					placeholder: 'Choose a Cloud platform',
-					values: [
-						'AWS',
-						'Google Cloud',
-						'Both AWS and Google Cloud'
-					],
-					style: {
-						col_md: 12,
-						col_lg: 6,  
-					}
-				}, {
-					id: 'full_name',
-					type:'text',
-					// label: 'First name',
-					placeholder: 'Enter your full name',
-					style: {
-						col_md: 12,
-						col_lg: 6,  
-					}
-				}, {
-					id: 'email',
-					type:'email',
-					// label: 'Email',
-					placeholder: 'Enter your email',
-					style: {
-						col_md: 12,
-						col_lg: 6,  
-					}
-				}, {
-					id: 'city',
-					type:'select',
-					// label: 'Last name',
-					placeholder: 'Choose a city',
-					values:[
-						'Sydney',
-						'Singapore',
-						'Los Angeles'
-					],
-					style: {
-						col_md: 12,
-						col_lg: 6,  
-					}
-				}, {
-					id: 'message',
-					type:'textarea',
-					// label: 'Email',
-					placeholder: 'Type your enquiry details here',
-					style: {
-						col_md: 12,
-						col_lg: 6,  
-					}
-				}, {
-					id: 'submit',
-					type:'button',
-					label: 'Submit'
-				}]
-			}]
+		const createForm = selector => field => new FormJS({
+			selector,
+			forms: [{ fields:[field] }]
 		})
+
+		const createTextField = createForm('#text-field')
+
+		const baseTextField = { 
+			id: 'hello',
+			type:'text',
+			helperTextAlwaysOn: true
+		}
+
+		const variants = [
+			{
+				...baseTextField,
+				helperText: `Default option`
+			}, {
+				...baseTextField,
+				placeholder: 'Enter something here',
+				helperText: `placeholder: 'Enter something here'`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				helperText: `label: 'Hello'`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				invalid: true,
+				helperText: `label: 'Hello' - invalid: true`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				invalid: true,
+				error: '#d500f9',
+				helperText: `label: 'Hello' - invalid: true - error: '#d500f9'`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				dense: true,
+				helperText: `label: 'Hello' - dense: true`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				primary: 'red',
+				helperText: `label: 'Hello' - primary: 'red'`
+			}, {
+				...baseTextField,
+				label: 'Number',
+				type: 'number',
+				helperText: `label: 'Number' - type: 'number'`
+			}, {
+				...baseTextField,
+				label: 'Number with step',
+				type: 'number',
+				step: 0.5,
+				helperText: `label: 'Number with step' - type: 'number' - step: 0.5`
+			}, {
+				...baseTextField,
+				label: 'Date',
+				type: 'date',
+				helperText: `label: 'Date' - type: 'date'`
+			}, {
+				...baseTextField,
+				label: 'Email',
+				type: 'email',
+				helperText: `label: 'Hello' - type: 'email'`
+			}, {
+				...baseTextField,
+				label: 'Password',
+				type: 'password',
+				helperText: `label: 'Password' - type: 'password'`
+			}, {
+				...baseTextField,
+				label: 'Email',
+				type: 'email',
+				leadingIcon: 'email-outlined',
+				helperText: `label: 'Hello' - type: 'email' - leadingIcon: 'email-outlined'`
+			}, {
+				...baseTextField,
+				label: 'Email',
+				type: 'email',
+				trailingIcon: 'email-outlined',
+				helperText: `label: 'Hello' - type: 'email' - trailingIcon: 'email-outlined'`
+			}, {
+				...baseTextField,
+				label: 'Password',
+				type: 'password',
+				helperText: `label: 'Password' - type: 'password'`
+			}, {
+				...baseTextField,
+				label: 'Password',
+				type: 'password',
+				passwordViewable: true,
+				trailingIcon: 'visibility',
+				helperText: `label: 'Password' - type: 'password' - passwordViewable: true - trailingIcon: 'visibility'`
+			}, {
+				...baseTextField,
+				label: 'Password',
+				type: 'password',
+				passwordViewable: true,
+				trailingIcon: 'visibility-outlined',
+				helperText: `label: 'Password' - type: 'password' - passwordViewable: true - trailingIcon: 'visibility-outlined'`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				primary: 'red',
+				width: 250,
+				helperText: `label: 'Hello' - primary: 'red' - width: 250`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				primary: 'red',
+				width: '100%',
+				helperText: `label: 'Hello' - primary: 'red' - width: 100%`
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				width: '100%',
+				maxChar: 15,
+				helperText: `label: 'Hello' - width: 100% - maxChar: 15`
+			}
+		]
+		
+		variants.forEach(createTextField)
+
+		// const variant01 = {
+		// 	...baseTextField,
+		// 	variant: 'outlined',
+		// 	helperText: `variant: 'outlined'`
+		// }
+		// createTextField(variant01)
+
+		// const variant01 = {
+		// 	...baseTextField,
+		// 	variant: 'filled',
+		// 	borders: 23,
+		// 	helperText: `variant: 'filled'`
+		// }
+		// createTextField(variant01)
+
+		// const variant01 = {
+		// 	...baseTextField,
+		// 	dense: true,
+		// 	helperText: 'dense: true'
+		// }
+		// createTextField(variant01)
+
+		// const variant01 = {
+		// 	...baseTextField,
+		// 	variant: 'outlined',
+		// 	dense: true,
+		// 	helperText: `variant: 'outlined' - dense: true`
+		// }
+		// createTextField(variant01)
+
+		// const variant01 = {
+		// 	...baseTextField,
+		// 	variant: 'filled',
+		// 	dense: true,
+		// 	helperText: `variant: 'filled' - dense: true`
+		// }
+		// createTextField(variant01)
 	</script>
 </body>
 </html>

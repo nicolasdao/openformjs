@@ -5,6 +5,9 @@ export default {
 			main: '#3f51b5',
 			dark: '#303f9f',
 			contrastText: '#fff'
+		},
+		error: {
+			main: '#b00020'
 		}
 	}
 }

@@ -1,14 +1,15 @@
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
+// Modified to be importable and properly linted
 
-let trimLeft = /^\s+/
-let trimRight = /\s+$/
+const trimLeft = /^\s+/
+const trimRight = /\s+$/
 let tinyCounter = 0
-let mathRound = Math.round
-let mathMin = Math.min
-let mathMax = Math.max
-let mathRandom = Math.random
+const mathRound = Math.round
+const mathMin = Math.min
+const mathMax = Math.max
+const mathRandom = Math.random
 
 function TinyColor(color, opts) {
 	color = (color) || ''
@@ -23,7 +24,7 @@ function TinyColor(color, opts) {
 		return new TinyColor(color, opts)
 	}
 
-	let rgb = inputToRGB(color)
+	const rgb = inputToRGB(color)
 	this._originalInput = color
 	this._r = rgb.r
 	this._g = rgb.g
@@ -66,16 +67,16 @@ TinyColor.prototype = {
 	},
 	getBrightness: function() {
 		//http://www.w3.org/TR/AERT#color-contrast
-		let rgb = this.toRgb()
+		const rgb = this.toRgb()
 		return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000
 	},
 	getLuminance: function() {
 		//http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-		let rgb = this.toRgb()
-		let RsRGB, GsRGB, BsRGB, R, G, B
-		RsRGB = rgb.r / 255
-		GsRGB = rgb.g / 255
-		BsRGB = rgb.b / 255
+		const rgb = this.toRgb()
+		let R, G, B
+		const RsRGB = rgb.r / 255
+		const GsRGB = rgb.g / 255
+		const BsRGB = rgb.b / 255
 
 		if (RsRGB <= 0.03928) { R = RsRGB / 12.92 } else { R = Math.pow(((RsRGB + 0.055) / 1.055), 2.4) }
 		if (GsRGB <= 0.03928) { G = GsRGB / 12.92 } else { G = Math.pow(((GsRGB + 0.055) / 1.055), 2.4) }
@@ -88,27 +89,27 @@ TinyColor.prototype = {
 		return this
 	},
 	toHsv: function() {
-		let hsv = rgbToHsv(this._r, this._g, this._b)
+		const hsv = rgbToHsv(this._r, this._g, this._b)
 		return { h: hsv.h * 360, s: hsv.s, v: hsv.v, a: this._a }
 	},
 	toHsvString: function() {
-		let hsv = rgbToHsv(this._r, this._g, this._b)
-		let h = mathRound(hsv.h * 360)
-			let s = mathRound(hsv.s * 100)
-			let v = mathRound(hsv.v * 100)
+		const hsv = rgbToHsv(this._r, this._g, this._b)
+		const h = mathRound(hsv.h * 360)
+		const s = mathRound(hsv.s * 100)
+		const v = mathRound(hsv.v * 100)
 		return (this._a == 1)
 			? 'hsv(' + h + ', ' + s + '%, ' + v + '%)'
 			: 'hsva(' + h + ', ' + s + '%, ' + v + '%, ' + this._roundA + ')'
 	},
 	toHsl: function() {
-		let hsl = rgbToHsl(this._r, this._g, this._b)
+		const hsl = rgbToHsl(this._r, this._g, this._b)
 		return { h: hsl.h * 360, s: hsl.s, l: hsl.l, a: this._a }
 	},
 	toHslString: function() {
-		let hsl = rgbToHsl(this._r, this._g, this._b)
-		let h = mathRound(hsl.h * 360)
-			let s = mathRound(hsl.s * 100)
-			let l = mathRound(hsl.l * 100)
+		const hsl = rgbToHsl(this._r, this._g, this._b)
+		const h = mathRound(hsl.h * 360)
+		const s = mathRound(hsl.s * 100)
+		const l = mathRound(hsl.l * 100)
 		return (this._a == 1)
 			? 'hsl(' + h + ', ' + s + '%, ' + l + '%)'
 			: 'hsla(' + h + ', ' + s + '%, ' + l + '%, ' + this._roundA + ')'
@@ -153,24 +154,24 @@ TinyColor.prototype = {
 		return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false
 	},
 	toFilter: function(secondColor) {
-		let hex8String = '#' + rgbaToArgbHex(this._r, this._g, this._b, this._a)
+		const hex8String = '#' + rgbaToArgbHex(this._r, this._g, this._b, this._a)
 		let secondHex8String = hex8String
-		let gradientType = this._gradientType ? 'GradientType = 1, ' : ''
+		const gradientType = this._gradientType ? 'GradientType = 1, ' : ''
 
 		if (secondColor) {
-			let s = TinyColor(secondColor)
+			const s = TinyColor(secondColor)
 			secondHex8String = '#' + rgbaToArgbHex(s._r, s._g, s._b, s._a)
 		}
 
 		return 'progid:DXImageTransform.Microsoft.gradient(' + gradientType + 'startColorstr=' + hex8String + ',endColorstr=' + secondHex8String + ')'
 	},
 	toString: function(format) {
-		let formatSet = !!format
+		const formatSet = !!format
 		format = format || this._format
 
 		let formattedString = false
-		let hasAlpha = this._a < 1 && this._a >= 0
-		let needsAlphaFormat = !formatSet && hasAlpha && (format === 'hex' || format === 'hex6' || format === 'hex3' || format === 'hex4' || format === 'hex8' || format === 'name')
+		const hasAlpha = this._a < 1 && this._a >= 0
+		const needsAlphaFormat = !formatSet && hasAlpha && (format === 'hex' || format === 'hex6' || format === 'hex3' || format === 'hex4' || format === 'hex8' || format === 'name')
 
 		if (needsAlphaFormat) {
 			// Special case for "transparent", all other non-alpha formats
@@ -215,7 +216,7 @@ TinyColor.prototype = {
 	},
 
 	_applyModification: function(fn, args) {
-		let color = fn.apply(null, [this].concat([].slice.call(args)))
+		const color = fn.apply(null, [this].concat([].slice.call(args)))
 		this._r = color._r
 		this._g = color._g
 		this._b = color._b
@@ -271,9 +272,9 @@ TinyColor.prototype = {
 // String input requires "1.0" as input, so 1 will be treated as 1
 TinyColor.fromRatio = function(color, opts) {
 	if (typeof color == 'object') {
-		let newColor = {}
-		for (let i in color) {
-			if (color.hasOwnProperty(i)) {
+		const newColor = {}
+		for (const i in color) {
+			if (Object.prototype.hasOwnProperty.call(color, i)) {
 				if (i === 'a') {
 					newColor[i] = color[i]
 				} else {
@@ -334,7 +335,7 @@ function inputToRGB(color) {
 			format = 'hsl'
 		}
 
-		if (color.hasOwnProperty('a')) {
+		if (Object.prototype.hasOwnProperty.call(color, 'a')) {
 			a = color.a
 		}
 	}
@@ -380,25 +381,25 @@ function rgbToHsl(r, g, b) {
 	g = bound01(g, 255)
 	b = bound01(b, 255)
 
-	let max = mathMax(r, g, b)
-		let min = mathMin(r, g, b)
-	let h; let s; let l = (max + min) / 2
+	const max = mathMax(r, g, b)
+	const min = mathMin(r, g, b)
+	let h; let s; const l = (max + min) / 2
 
 	if (max == min) {
 		h = s = 0 // achromatic
 	} else {
-		let d = max - min
+		const d = max - min
 		s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
 		switch (max) {
-			case r:
-				h = (g - b) / d + (g < b ? 6 : 0)
-				break
-			case g:
-				h = (b - r) / d + 2
-				break
-			case b:
-				h = (r - g) / d + 4
-				break
+		case r:
+			h = (g - b) / d + (g < b ? 6 : 0)
+			break
+		case g:
+			h = (b - r) / d + 2
+			break
+		case b:
+			h = (r - g) / d + 4
+			break
 		}
 
 		h /= 6
@@ -430,8 +431,8 @@ function hslToRgb(h, s, l) {
 	if (s === 0) {
 		r = g = b = l // achromatic
 	} else {
-		let q = l < 0.5 ? l * (1 + s) : l + s - l * s
-		let p = 2 * l - q
+		const q = l < 0.5 ? l * (1 + s) : l + s - l * s
+		const p = 2 * l - q
 		r = hue2rgb(p, q, h + 1 / 3)
 		g = hue2rgb(p, q, h)
 		b = hue2rgb(p, q, h - 1 / 3)
@@ -449,30 +450,30 @@ function rgbToHsv(r, g, b) {
 	g = bound01(g, 255)
 	b = bound01(b, 255)
 
-	let max = mathMax(r, g, b)
-		let min = mathMin(r, g, b)
-	let h; let s; let v = max
+	const max = mathMax(r, g, b)
+	const min = mathMin(r, g, b)
+	let h; const v = max
 
-	let d = max - min
-	s = max === 0 ? 0 : d / max
+	const d = max - min
+	const s = max === 0 ? 0 : d / max
 
 	if (max == min) {
 		h = 0 // achromatic
 	} else {
 		switch (max) {
-			case r:
-				h = (g - b) / d + (g < b ? 6 : 0)
-				break
-			case g:
-				h = (b - r) / d + 2
-				break
-			case b:
-				h = (r - g) / d + 4
-				break
+		case r:
+			h = (g - b) / d + (g < b ? 6 : 0)
+			break
+		case g:
+			h = (b - r) / d + 2
+			break
+		case b:
+			h = (r - g) / d + 4
+			break
 		}
 		h /= 6
 	}
-	return { h: h, s: s, v: v }
+	return { h, s, v }
 }
 
 // `hsvToRgb`
@@ -484,15 +485,15 @@ function hsvToRgb(h, s, v) {
 	s = bound01(s, 100)
 	v = bound01(v, 100)
 
-	let i = Math.floor(h)
-		let f = h - i
-		let p = v * (1 - s)
-		let q = v * (1 - f * s)
-		let t = v * (1 - (1 - f) * s)
-		let mod = i % 6
-		let r = [v, q, p, p, t, v][mod]
-		let g = [t, v, v, q, p, p][mod]
-		let b = [p, p, t, v, v, q][mod]
+	const i = Math.floor(h)
+	const f = h - i
+	const p = v * (1 - s)
+	const q = v * (1 - f * s)
+	const t = v * (1 - (1 - f) * s)
+	const mod = i % 6
+	const r = [v, q, p, p, t, v][mod]
+	const g = [t, v, v, q, p, p][mod]
+	const b = [p, p, t, v, v, q][mod]
 
 	return { r: r * 255, g: g * 255, b: b * 255 }
 }
@@ -502,7 +503,7 @@ function hsvToRgb(h, s, v) {
 // Assumes r, g, and b are contained in the set [0, 255]
 // Returns a 3 or 6 character hex
 function rgbToHex(r, g, b, allow3Char) {
-	let hex = [
+	const hex = [
 		pad2(mathRound(r).toString(16)),
 		pad2(mathRound(g).toString(16)),
 		pad2(mathRound(b).toString(16))
@@ -521,7 +522,7 @@ function rgbToHex(r, g, b, allow3Char) {
 // Assumes r, g, b are contained in the set [0, 255] and
 // a in [0, 1]. Returns a 4 or 8 character rgba hex
 function rgbaToHex(r, g, b, a, allow4Char) {
-	let hex = [
+	const hex = [
 		pad2(mathRound(r).toString(16)),
 		pad2(mathRound(g).toString(16)),
 		pad2(mathRound(b).toString(16)),
@@ -540,7 +541,7 @@ function rgbaToHex(r, g, b, a, allow4Char) {
 // Converts an RGBA color to an ARGB Hex8 string
 // Rarely used, but required for "toFilter()"
 function rgbaToArgbHex(r, g, b, a) {
-	let hex = [
+	const hex = [
 		pad2(convertDecimalToHex(a)),
 		pad2(mathRound(r).toString(16)),
 		pad2(mathRound(g).toString(16)),
@@ -573,7 +574,7 @@ TinyColor.random = function() {
 
 function desaturate(color, amount) {
 	amount = (amount === 0) ? 0 : (amount || 10)
-	let hsl = TinyColor(color).toHsl()
+	const hsl = TinyColor(color).toHsl()
 	hsl.s -= amount / 100
 	hsl.s = clamp01(hsl.s)
 	return TinyColor(hsl)
@@ -581,7 +582,7 @@ function desaturate(color, amount) {
 
 function saturate(color, amount) {
 	amount = (amount === 0) ? 0 : (amount || 10)
-	let hsl = TinyColor(color).toHsl()
+	const hsl = TinyColor(color).toHsl()
 	hsl.s += amount / 100
 	hsl.s = clamp01(hsl.s)
 	return TinyColor(hsl)
@@ -593,7 +594,7 @@ function greyscale(color) {
 
 function lighten(color, amount) {
 	amount = (amount === 0) ? 0 : (amount || 10)
-	let hsl = TinyColor(color).toHsl()
+	const hsl = TinyColor(color).toHsl()
 	hsl.l += amount / 100
 	hsl.l = clamp01(hsl.l)
 	return TinyColor(hsl)
@@ -601,7 +602,7 @@ function lighten(color, amount) {
 
 function brighten(color, amount) {
 	amount = (amount === 0) ? 0 : (amount || 10)
-	let rgb = TinyColor(color).toRgb()
+	const rgb = TinyColor(color).toRgb()
 	rgb.r = mathMax(0, mathMin(255, rgb.r - mathRound(255 * -(amount / 100))))
 	rgb.g = mathMax(0, mathMin(255, rgb.g - mathRound(255 * -(amount / 100))))
 	rgb.b = mathMax(0, mathMin(255, rgb.b - mathRound(255 * -(amount / 100))))
@@ -610,7 +611,7 @@ function brighten(color, amount) {
 
 function darken(color, amount) {
 	amount = (amount === 0) ? 0 : (amount || 10)
-	let hsl = TinyColor(color).toHsl()
+	const hsl = TinyColor(color).toHsl()
 	hsl.l -= amount / 100
 	hsl.l = clamp01(hsl.l)
 	return TinyColor(hsl)
@@ -619,8 +620,8 @@ function darken(color, amount) {
 // Spin takes a positive or negative amount within [-360, 360] indicating the change of hue.
 // Values outside of this range will be wrapped into this range.
 function spin(color, amount) {
-	let hsl = TinyColor(color).toHsl()
-	let hue = (hsl.h + amount) % 360
+	const hsl = TinyColor(color).toHsl()
+	const hue = (hsl.h + amount) % 360
 	hsl.h = hue < 0 ? 360 + hue : hue
 	return TinyColor(hsl)
 }
@@ -631,14 +632,14 @@ function spin(color, amount) {
 // <https://github.com/infusion/jQuery-xcolor/blob/master/jquery.xcolor.js>
 
 function complement(color) {
-	let hsl = TinyColor(color).toHsl()
+	const hsl = TinyColor(color).toHsl()
 	hsl.h = (hsl.h + 180) % 360
 	return TinyColor(hsl)
 }
 
 function triad(color) {
-	let hsl = TinyColor(color).toHsl()
-	let h = hsl.h
+	const hsl = TinyColor(color).toHsl()
+	const h = hsl.h
 	return [
 		TinyColor(color),
 		TinyColor({ h: (h + 120) % 360, s: hsl.s, l: hsl.l }),
@@ -647,8 +648,8 @@ function triad(color) {
 }
 
 function tetrad(color) {
-	let hsl = TinyColor(color).toHsl()
-	let h = hsl.h
+	const hsl = TinyColor(color).toHsl()
+	const h = hsl.h
 	return [
 		TinyColor(color),
 		TinyColor({ h: (h + 90) % 360, s: hsl.s, l: hsl.l }),
@@ -658,8 +659,8 @@ function tetrad(color) {
 }
 
 function splitcomplement(color) {
-	let hsl = TinyColor(color).toHsl()
-	let h = hsl.h
+	const hsl = TinyColor(color).toHsl()
+	const h = hsl.h
 	return [
 		TinyColor(color),
 		TinyColor({ h: (h + 72) % 360, s: hsl.s, l: hsl.l }),
@@ -671,9 +672,9 @@ function analogous(color, results, slices) {
 	results = results || 6
 	slices = slices || 30
 
-	let hsl = TinyColor(color).toHsl()
-	let part = 360 / slices
-	let ret = [TinyColor(color)]
+	const hsl = TinyColor(color).toHsl()
+	const part = 360 / slices
+	const ret = [TinyColor(color)]
 
 	for (hsl.h = ((hsl.h - (part * results >> 1)) + 720) % 360; --results;) {
 		hsl.h = (hsl.h + part) % 360
@@ -684,12 +685,12 @@ function analogous(color, results, slices) {
 
 function monochromatic(color, results) {
 	results = results || 6
-	let hsv = TinyColor(color).toHsv()
-	let h = hsv.h
-		let s = hsv.s
-		let v = hsv.v
-	let ret = []
-	let modification = 1 / results
+	const hsv = TinyColor(color).toHsv()
+	const h = hsv.h
+	const s = hsv.s
+	let v = hsv.v
+	const ret = []
+	const modification = 1 / results
 
 	while (results--) {
 		ret.push(TinyColor({ h: h, s: s, v: v }))
@@ -705,12 +706,12 @@ function monochromatic(color, results) {
 TinyColor.mix = function(color1, color2, amount) {
 	amount = (amount === 0) ? 0 : (amount || 50)
 
-	let rgb1 = TinyColor(color1).toRgb()
-	let rgb2 = TinyColor(color2).toRgb()
+	const rgb1 = TinyColor(color1).toRgb()
+	const rgb2 = TinyColor(color2).toRgb()
 
-	let p = amount / 100
+	const p = amount / 100
 
-	let rgba = {
+	const rgba = {
 		r: ((rgb2.r - rgb1.r) * p) + rgb1.r,
 		g: ((rgb2.g - rgb1.g) * p) + rgb1.g,
 		b: ((rgb2.b - rgb1.b) * p) + rgb1.b,
@@ -728,8 +729,8 @@ TinyColor.mix = function(color1, color2, amount) {
 // `contrast`
 // Analyze the 2 colors and returns the color contrast defined by (WCAG Version 2)
 TinyColor.readability = function(color1, color2) {
-	let c1 = TinyColor(color1)
-	let c2 = TinyColor(color2)
+	const c1 = TinyColor(color1)
+	const c2 = TinyColor(color2)
 	return (Math.max(c1.getLuminance(), c2.getLuminance()) + 0.05) / (Math.min(c1.getLuminance(), c2.getLuminance()) + 0.05)
 }
 
@@ -744,23 +745,22 @@ TinyColor.readability = function(color1, color2) {
 //    TinyColor.isReadable("#000", "#111") => false
 //    TinyColor.isReadable("#000", "#111",{level:"AA",size:"large"}) => false
 TinyColor.isReadable = function(color1, color2, wcag2) {
-	let readability = TinyColor.readability(color1, color2)
-	let wcag2Parms, out
+	const readability = TinyColor.readability(color1, color2)
 
-	out = false
+	let out = false
 
-	wcag2Parms = validateWCAG2Parms(wcag2)
+	const wcag2Parms = validateWCAG2Parms(wcag2)
 	switch (wcag2Parms.level + wcag2Parms.size) {
-		case 'AAsmall':
-		case 'AAAlarge':
-			out = readability >= 4.5
-			break
-		case 'AAlarge':
-			out = readability >= 3
-			break
-		case 'AAAsmall':
-			out = readability >= 7
-			break
+	case 'AAsmall':
+	case 'AAAlarge':
+		out = readability >= 4.5
+		break
+	case 'AAlarge':
+		out = readability >= 3
+		break
+	case 'AAAsmall':
+		out = readability >= 7
+		break
 	}
 	return out
 }
@@ -778,11 +778,10 @@ TinyColor.mostReadable = function(baseColor, colorList, args) {
 	let bestColor = null
 	let bestScore = 0
 	let readability
-	let includeFallbackColors, level, size
 	args = args || {}
-	includeFallbackColors = args.includeFallbackColors
-	level = args.level
-	size = args.size
+	const includeFallbackColors = args.includeFallbackColors
+	const level = args.level
+	const size = args.size
 
 	for (let i = 0; i < colorList.length; i++) {
 		readability = TinyColor.readability(baseColor, colorList[i])
@@ -792,7 +791,7 @@ TinyColor.mostReadable = function(baseColor, colorList, args) {
 		}
 	}
 
-	if (TinyColor.isReadable(baseColor, bestColor, { 'level': level, 'size': size }) || !includeFallbackColors) {
+	if (TinyColor.isReadable(baseColor, bestColor, { level, size }) || !includeFallbackColors) {
 		return bestColor
 	} else {
 		args.includeFallbackColors = false
@@ -804,7 +803,7 @@ TinyColor.mostReadable = function(baseColor, colorList, args) {
 // Big List of Colors
 // ------------------
 // <http://www.w3.org/TR/css3-color/#svg-color>
-let names = TinyColor.names = {
+const names = TinyColor.names = {
 	aliceblue: 'f0f8ff',
 	antiquewhite: 'faebd7',
 	aqua: '0ff',
@@ -957,7 +956,7 @@ let names = TinyColor.names = {
 }
 
 // Make it easy to access colors via `hexNames[hex]`
-let hexNames = TinyColor.hexNames = flip(names)
+const hexNames = TinyColor.hexNames = flip(names)
 
 
 // Utilities
@@ -965,9 +964,9 @@ let hexNames = TinyColor.hexNames = flip(names)
 
 // `{ 'name1': 'val1' }` becomes `{ 'val1': 'name1' }`
 function flip(o) {
-	let flipped = {}
-	for (let i in o) {
-		if (o.hasOwnProperty(i)) {
+	const flipped = {}
+	for (const i in o) {
+		if (Object.prototype.hasOwnProperty.call(o,i)) {
 			flipped[o[i]] = i
 		}
 	}
@@ -989,7 +988,7 @@ function boundAlpha(a) {
 function bound01(n, max) {
 	if (isOnePointZero(n)) { n = '100%' }
 
-	let processPercent = isPercentage(n)
+	const processPercent = isPercentage(n)
 	n = mathMin(max, mathMax(0, parseFloat(n)))
 
 	// Automatically convert percentage into number
@@ -1050,21 +1049,21 @@ function convertHexToDecimal(h) {
 	return (parseIntFromHex(h) / 255)
 }
 
-let matchers = (function() {
+const matchers = (function() {
 	// <http://www.w3.org/TR/css3-values/#integers>
-	let CSS_INTEGER = '[-\\+]?\\d+%?'
+	const CSS_INTEGER = '[-\\+]?\\d+%?'
 
 	// <http://www.w3.org/TR/css3-values/#number-value>
-	let CSS_NUMBER = '[-\\+]?\\d*\\.\\d+%?'
+	const CSS_NUMBER = '[-\\+]?\\d*\\.\\d+%?'
 
 	// Allow positive/negative integer/number.  Don't capture the either/or, just the entire outcome.
-	let CSS_UNIT = '(?:' + CSS_NUMBER + ')|(?:' + CSS_INTEGER + ')'
+	const CSS_UNIT = '(?:' + CSS_NUMBER + ')|(?:' + CSS_INTEGER + ')'
 
 	// Actual matching.
 	// Parentheses and commas are optional, but not required.
 	// Whitespace can take the place of commas or opening paren
-	let PERMISSIVE_MATCH3 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?'
-	let PERMISSIVE_MATCH4 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?'
+	const PERMISSIVE_MATCH3 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?'
+	const PERMISSIVE_MATCH4 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?'
 
 	return {
 		CSS_UNIT: new RegExp(CSS_UNIT),
@@ -1166,7 +1165,7 @@ function validateWCAG2Parms(parms) {
 	// return valid WCAG2 parms for isReadable.
 	// If input parms are invalid, return {"level":"AA", "size":"small"}
 	let level, size
-	parms = parms || { 'level': 'AA', 'size': 'small' }
+	parms = parms || { level: 'AA', size: 'small' }
 	level = (parms.level || 'AA').toUpperCase()
 	size = (parms.size || 'small').toLowerCase()
 	if (level !== 'AA' && level !== 'AAA') {
@@ -1175,10 +1174,7 @@ function validateWCAG2Parms(parms) {
 	if (size !== 'small' && size !== 'large') {
 		size = 'small'
 	}
-	return { 'level': level, 'size': size }
+	return { level: level, size: size }
 }
 
-export {
-	TinyColor
-}
-
+export default TinyColor

@@ -43,7 +43,10 @@
 			if (!Plugin)
 				throw new Error(`Invalid Field ID ${field.id}. Plugin ${field.plugin} not found.`)
 
-			const fieldType = field.type.replace(/^./, m => m.toUpperCase())
+			let fieldType = field.type.replace(/^./, m => m.toUpperCase())
+			if (fieldType == 'Textarea' || fieldType == 'Number' || fieldType == 'Date' || fieldType == 'Password' || fieldType == 'Email')
+				fieldType = 'Text'
+			
 			if (!Plugin[fieldType])
 				throw new Error(`Invalid Field ID ${field.id}. Definition for field type '${fieldType}' not found in Plugin ${field.plugin}.`)
 
@@ -57,14 +60,14 @@
 
 </script>
 
-<div {id} data-widget="formjs" data-version={version}>
-	{#each forms as form}
-		<Form class="hello-nic" fields={getComponentFields(form)}></Form>
-	{/each}
-</div>
-
 <style type="text/scss">
-	.hello-nic {
-		padding: 0px;
+	.openform-stylesheet {
+		@import "node_modules/bootstrap/scss/bootstrap-grid";
 	}
 </style>
+
+<div {id} class="openform-stylesheet" data-widget="formjs" data-version={version}>
+	{#each forms as form}
+		<Form fields={getComponentFields(form)}></Form>
+	{/each}
+</div>
