@@ -7,8 +7,8 @@
 	<title>Svelte app</title>
 
 	<link rel='icon' type='image/png' href='/favicon.png'>
-	<link rel='stylesheet' href='/build/bundle.css'>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel='stylesheet' href='/build/bundle.css'>
 
 	<!-- <script defer src='/build/bundle.js' data-config='{"selector":"#main"}'></script> -->
 	<script defer src='/build/bundle.js'></script>
@@ -19,16 +19,16 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-sm">
-					<h3 class="mb-4">Text fields</h3>
-					<div id="text-field"></div>
+					<h3 class="mb-4">Text - Basic</h3>
+					<div id="text-basic"></div>
 				</div>
 				<div class="col-sm">
-					<h3 class="mb-4">Select</h3>
-					<div id="select"></div>
+					<h3 class="mb-4">Text - Filled</h3>
+					<div id="text-filled"></div>
 				</div>
 				<div class="col-sm">
-					<h3 class="mb-4">Checkboxes</h3>
-					<div id="checkboxes"></div>
+					<h3 class="mb-4">Text - Outlined</h3>
+					<div id="text-outlined"></div>
 				</div>
 			</div>
 		</div>
@@ -40,7 +40,9 @@
 			forms: [{ fields:[field] }]
 		})
 
-		const createTextField = createForm('#text-field')
+		const createTextBasic = createForm('#text-basic')
+		const createTextFilled = createForm('#text-filled')
+		const createTextOutlined = createForm('#text-outlined')
 
 		const baseTextField = { 
 			id: 'hello',
@@ -62,142 +64,136 @@
 				helperText: `label: 'Hello'`
 			}, {
 				...baseTextField,
-				label: 'Hello',
+				label: 'Error',
 				invalid: true,
-				helperText: `label: 'Hello' - invalid: true`
+				helperText: [`label: 'Error'`, `invalid: true`]
 			}, {
 				...baseTextField,
-				label: 'Hello',
+				label: 'Error',
 				invalid: true,
 				error: '#d500f9',
-				helperText: `label: 'Hello' - invalid: true - error: '#d500f9'`
+				helperText: [`label: 'Hello'`, `invalid: true`, `error: '#d500f9'`]
 			}, {
 				...baseTextField,
 				label: 'Hello',
 				dense: true,
-				helperText: `label: 'Hello' - dense: true`
+				helperText: [`label: 'Hello'`, `dense: true`]
 			}, {
 				...baseTextField,
-				label: 'Hello',
+				label: 'Hello red',
 				primary: 'red',
-				helperText: `label: 'Hello' - primary: 'red'`
+				helperText: [`label: 'Hello red'`, `primary: 'red'`]
+			}, {
+				...baseTextField,
+				label: 'Custom borders',
+				borders: 18,
+				helperText: [`label: 'Border'`, `borders: 18`]
+			}, {
+				...baseTextField,
+				label: 'Asymmetric borders',
+				borders: { left: 30, right:0 },
+				helperText: [`label: 'Asymmetric borders'`, `borders: { left: 30, right:0 }`]
 			}, {
 				...baseTextField,
 				label: 'Number',
 				type: 'number',
-				helperText: `label: 'Number' - type: 'number'`
+				helperText: [`label: 'Number'`, `type: 'number'`]
 			}, {
 				...baseTextField,
 				label: 'Number with step',
 				type: 'number',
 				step: 0.5,
-				helperText: `label: 'Number with step' - type: 'number' - step: 0.5`
+				helperText: [`label: 'Number with step'`, `type: 'number'`, `step: 0.5`]
 			}, {
 				...baseTextField,
 				label: 'Date',
 				type: 'date',
-				helperText: `label: 'Date' - type: 'date'`
+				helperText: [`label: 'Date'`, `type: 'date'`]
+			}, {
+				...baseTextField,
+				label: 'Date & time',
+				type: 'datetime',
+				helperText: [`label: 'Date'`, `type: 'datetime'`]
 			}, {
 				...baseTextField,
 				label: 'Email',
 				type: 'email',
-				helperText: `label: 'Hello' - type: 'email'`
+				helperText: [`label: 'Hello'`, `type: 'email'`]
 			}, {
 				...baseTextField,
 				label: 'Password',
 				type: 'password',
-				helperText: `label: 'Password' - type: 'password'`
+				helperText: [`label: 'Password'`, `type: 'password'`]
 			}, {
 				...baseTextField,
 				label: 'Email',
 				type: 'email',
 				leadingIcon: 'email-outlined',
-				helperText: `label: 'Hello' - type: 'email' - leadingIcon: 'email-outlined'`
+				helperText: [`label: 'Hello'`, `type: 'email'`, `leadingIcon: 'email-outlined'`]
 			}, {
 				...baseTextField,
 				label: 'Email',
 				type: 'email',
 				trailingIcon: 'email-outlined',
-				helperText: `label: 'Hello' - type: 'email' - trailingIcon: 'email-outlined'`
+				helperText: [`label: 'Hello'`, `type: 'email'`, `trailingIcon: 'email-outlined'`]
 			}, {
 				...baseTextField,
 				label: 'Password',
 				type: 'password',
-				helperText: `label: 'Password' - type: 'password'`
+				helperText: [`label: 'Password'`, `type: 'password'`]
 			}, {
 				...baseTextField,
 				label: 'Password',
 				type: 'password',
 				passwordViewable: true,
 				trailingIcon: 'visibility',
-				helperText: `label: 'Password' - type: 'password' - passwordViewable: true - trailingIcon: 'visibility'`
+				helperText: [`label: 'Password'`, `type: 'password'`, `passwordViewable: true`, `trailingIcon: 'visibility'`]
 			}, {
 				...baseTextField,
 				label: 'Password',
 				type: 'password',
 				passwordViewable: true,
 				trailingIcon: 'visibility-outlined',
-				helperText: `label: 'Password' - type: 'password' - passwordViewable: true - trailingIcon: 'visibility-outlined'`
+				helperText: [`label: 'Password'`, `type: 'password'`, `passwordViewable: true`, `trailingIcon: 'visibility-outlined'`]
 			}, {
 				...baseTextField,
 				label: 'Hello',
-				primary: 'red',
 				width: 250,
-				helperText: `label: 'Hello' - primary: 'red' - width: 250`
+				helperText: [`label: 'Hello'`, `width: 250`]
+			}, {
+				...baseTextField,
+				label: 'Hello 40',
+				height: 40,
+				helperText: [`label: 'Hello'`, `height: 40`]
+			}, {
+				...baseTextField,
+				label: 'Hello 80',
+				height: 80,
+				helperText: [`label: 'Hello'`, `height: 80`]
+			}, {
+				...baseTextField,
+				label: 'Hello 80',
+				height: 100,
+				fontScale: 2,
+				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 3`]
 			}, {
 				...baseTextField,
 				label: 'Hello',
-				primary: 'red',
 				width: '100%',
-				helperText: `label: 'Hello' - primary: 'red' - width: 100%`
+				helperText: [`label: 'Hello'`, `width: 100%`]
 			}, {
 				...baseTextField,
 				label: 'Hello',
 				width: '100%',
 				maxChar: 15,
-				helperText: `label: 'Hello' - width: 100% - maxChar: 15`
+				helperText: [`label: 'Hello'`, `width: 100%`, `maxChar: 15`]
 			}
 		]
 		
-		variants.forEach(createTextField)
+		variants.forEach(createTextBasic)
+		variants.forEach(v => createTextFilled({ ...v, variant:'filled' }))
+		variants.forEach(v => createTextOutlined({ ...v, variant:'outlined' }))
 
-		// const variant01 = {
-		// 	...baseTextField,
-		// 	variant: 'outlined',
-		// 	helperText: `variant: 'outlined'`
-		// }
-		// createTextField(variant01)
-
-		// const variant01 = {
-		// 	...baseTextField,
-		// 	variant: 'filled',
-		// 	borders: 23,
-		// 	helperText: `variant: 'filled'`
-		// }
-		// createTextField(variant01)
-
-		// const variant01 = {
-		// 	...baseTextField,
-		// 	dense: true,
-		// 	helperText: 'dense: true'
-		// }
-		// createTextField(variant01)
-
-		// const variant01 = {
-		// 	...baseTextField,
-		// 	variant: 'outlined',
-		// 	dense: true,
-		// 	helperText: `variant: 'outlined' - dense: true`
-		// }
-		// createTextField(variant01)
-
-		// const variant01 = {
-		// 	...baseTextField,
-		// 	variant: 'filled',
-		// 	dense: true,
-		// 	helperText: `variant: 'filled' - dense: true`
-		// }
-		// createTextField(variant01)
 	</script>
 </body>
 </html>

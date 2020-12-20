@@ -44,9 +44,9 @@
 				throw new Error(`Invalid Field ID ${field.id}. Plugin ${field.plugin} not found.`)
 
 			let fieldType = field.type.replace(/^./, m => m.toUpperCase())
-			if (fieldType == 'Textarea' || fieldType == 'Number' || fieldType == 'Date' || fieldType == 'Password' || fieldType == 'Email')
+			if (fieldType == 'Textarea' || fieldType == 'Number' || fieldType == 'Date' || fieldType == 'Datetime' || fieldType == 'Password' || fieldType == 'Email')
 				fieldType = 'Text'
-			
+
 			if (!Plugin[fieldType])
 				throw new Error(`Invalid Field ID ${field.id}. Definition for field type '${fieldType}' not found in Plugin ${field.plugin}.`)
 

@@ -1,0 +1,8 @@
+/*
+Style to reset external CSS on standard DOM. This prevents external CSS to affect the DOM tags of the openform components
+*/
+
+label {
+	padding: 0px;
+	margin: 0px;
+}

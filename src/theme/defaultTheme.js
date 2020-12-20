@@ -1,3 +1,5 @@
+// Source: https://material-ui.com/customization/default-theme/
+
 export default {
 	palette: {
 		primary: {
@@ -7,7 +9,10 @@ export default {
 			contrastText: '#fff'
 		},
 		error: {
-			main: '#b00020'
+			light: '#e57373',
+			main: '#f44336',
+			dark: '#d32f2f',
+			contrastText: '#fff'
 		}
 	}
 }

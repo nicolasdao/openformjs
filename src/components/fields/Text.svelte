@@ -2,17 +2,31 @@
 	doc examples: https://sveltematerialui.com/demo/textfield 
 	doc code: https://github.com/hperrin/svelte-material-ui/blob/master/site/src/routes/demo/textfield.svelte
 	design theory: https://material.io/components/text-fields
+
+	Usefull info:
+	- Default height: 56px
+	- Default font-size: 1rem
+	- Default label font-size: 1rem
+	- Dense height: 48px
 -->
 
 <script>
+	const DEFAULT_MATERIAL_ICON_CLASS = 'material-icons-outlined'
+	const DEFAULT_HEIGHT = 56
+
+	/* 
+	=======================================================
+	START - PROPERTIES
+	=======================================================
+	*/
 	// Meta
 	export let id = ''
 	// Content
 	export let label
 	export let placeholder
 	export let value = ''
-	export let type = 'text' // 'text', 'textarea', 'number', 'date', 'password', 'email'
-	export let helperText = ''
+	export let type = 'text' // 'text', 'textarea', 'number', 'date', 'datetime' (this includes hours), 'password', 'email'
+	export let helperText = '' // This can also be an array, in which case each item represents a new line
 	export let leadingIcon // all icon's name at https://material.io/resources/icons/?style=baseline
 	export let trailingIcon // all icon's name at https://material.io/resources/icons/?style=baseline
 	// Style
@@ -21,14 +35,23 @@
 	export let primary = defaultTheme.palette.primary.main
 	export let error = defaultTheme.palette.error.main
 	export let width // Can number (unit px) or string. If string, then this is CSS (e.g., '100%', 'calc(100% - 12px)')
+	export let height = DEFAULT_HEIGHT
 	export let padding = 10
 	export let helperTextAlwaysOn
 	export let borders
+	export let fontScale = 1
+	export let helperTextListStyle = 'none' // CSS value for the 'list-style-type' property. Valid values: 'disc' (aka bullet), 'circle', 'none', 'decimal', 'square', 'lower-latin' (e.g., 'a', 'b'), 'lower-roman' (e.g., 'i', 'ii')
 	// Behavior
 	export let maxChar
 	export let invalid = false
 	export let step = 1
 	export let passwordViewable = false // When true, a trailing eye icon allows the user to switch hidden/visible password
+	
+	/* 
+	=======================================================
+	END - PROPERTIES
+	=======================================================
+	*/
 	
 	import Textfield from '@smui/textfield'
 	import HelperText from '@smui/textfield/helper-text/index'
@@ -38,40 +61,34 @@
 	import defaultTheme from '../../theme/defaultTheme.js'
 	import { getId } from '../../utils/component.js'
 	import TinyColor from '../../utils/tinyColor'
-	import { cardinalParse, iconToMaterial } from '../../utils/converter.js'
+	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
-	const DEFAULT_MATERIAL_ICON_CLASS = 'material-icons-outlined'
-	const _id = getId()
-	const description = `text-field-${_id}`
-	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
-	const showHelperTextOnly = helperText && !showMaxChar
-	const showPasswordVisibilityIcon = type == 'password' && passwordViewable
-	let fieldType = !type || type == 'text' ? undefined : type == 'date' ? 'datetime-local' : type
-	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
-	const cssPadding = cardinalParse(padding)
-	const rootClass = css`
-		--mdc-theme-primary: ${primary};
-		--mdc-theme-error: ${error};
-		& .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
-			color: ${labelColor};
-		}
-
-		padding-top: ${cssPadding.top};
-		padding-bottom: ${cssPadding.bottom};
-		padding-right: ${cssPadding.right};
-		padding-left: ${cssPadding.left};
-	`
-
-	const getBorders = (border, variant) => {
-		if (border === undefined || border === null)
+	const getBorders = (borders, variant) => {
+		if (borders === undefined || borders === null)
 			return ''
-		else if (variant == 'filled')
-			return css`
+
+		const { topLeft, topRight, bottomLeft, bottomRight } = cornerParse(borders)
+		if (variant == 'filled')
+			return `
 				& label.mdc-text-field {
-					border-radius: ${border}px ${border}px 0px 0px;
+					border-radius: ${topLeft}px ${topRight}px 0px 0px;
 				}
 			`
-		else
+		else if (variant == 'outlined') {
+			const customLeadingWidth = (topLeft && topLeft > 12) || (bottomLeft && bottomLeft > 12)
+				? (topLeft || 0) > (bottomLeft || 0) ? topLeft : bottomLeft
+				: null
+			return `
+				& .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading {
+					border-radius: ${topLeft}px 0px 0px ${bottomLeft}px;
+					${customLeadingWidth ? `width: ${customLeadingWidth}px` : '' }
+				}
+
+				& .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing {
+					border-radius: 0px ${topRight}px ${bottomRight}px 0px;
+				}
+			`
+		} else
 			return ''
 	}
 
@@ -80,14 +97,14 @@
 			return ''
 		const t = typeof(width)
 		if (t == 'number')
-			return css`
+			return `
 				width: ${width}px;
 				& label.mdc-text-field {
 					width: ${width}px;
 				}
 			`
 		else if (t == 'string')
-			return css`
+			return `
 				width: ${width};
 				& label.mdc-text-field {
 					width: ${width};
@@ -97,6 +114,7 @@
 			return ''
 	}
 
+	const showPasswordVisibilityIcon = type == 'password' && passwordViewable
 	const getCorrectTrailingIcon = icon => {
 		const trailingMDIcon = iconToMaterial(icon)
 		if (showPasswordVisibilityIcon)
@@ -105,8 +123,97 @@
 			return trailingMDIcon
 	}
 
-	const bordersClass = getBorders(borders, variant)
-	const widthClass = getWidth(width)
+	const _id = getId()
+	const description = `text-field-${_id}`
+	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
+	const showHelperTextOnly = helperText && !showMaxChar
+	
+	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
+	const labelOutlinedTopPos = Math.round((0.496847*height)-10.0876)
+	const labelTopPos = Math.round((0.487637*height)-8.51976)
+	const labelOutlinedYtranslatePerc = Math.round((-0.00130053*height*height) - (2.57357*height) + 4.22145)
+	const labelDenseScale = dense ? 0.8 : 0.75
+	let fieldType = !type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type
+	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
+	const cssPadding = paddingParse(padding)
+	const themeStyle = `
+		--mdc-theme-primary: ${primary};
+		--mdc-theme-error: ${error};
+		& .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+			color: ${labelColor};
+		}
+	`
+
+	const fontStyle = fontScale == 1 ? '' : `
+		& input {
+			font-size: ${fontScale}rem;
+		}
+	`
+// mdc-floating-label
+	const heightStyle = `
+		& label.mdc-text-field {
+			height: ${height}px;
+		}
+
+		${height == DEFAULT_HEIGHT ? '' : variant == 'outlined' 
+		? `
+			& .mdc-text-field--outlined {
+				& .mdc-floating-label {
+					top: ${labelOutlinedTopPos}px;
+				}
+				& .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
+					transform: translateY(${labelOutlinedYtranslatePerc}%) scale(${labelDenseScale});
+				}
+			}
+		`
+		: variant == 'filler' ? `
+			& .mdc-text-field .mdc-floating-label {
+				top: ${labelTopPos}px;
+			}
+		`
+		: `
+			& .mdc-text-field .mdc-floating-label {
+				top: ${labelTopPos}px;
+				${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
+
+				&.mdc-floating-label--float-above {
+					transform: translateY(-50%) scale(${labelDenseScale*fontScale}) !important;
+				}
+			}
+		` 
+	}
+	`
+
+	const paddingStyle = `
+		padding-top: ${cssPadding.top}px;
+		padding-bottom: ${cssPadding.bottom}px;
+		padding-right: ${cssPadding.right}px;
+		padding-left: ${cssPadding.left}px;
+	`
+
+	const passwordSwitchClass = css`
+		width: ${variant == 'outlined' ? 48 : 26}px;
+		height: 100%;
+		left: auto;
+		right: 0;
+		position: absolute;
+		cursor: pointer;
+		z-index: 10;
+	`
+
+	const helperTextClass = css`
+		margin: 0px;
+		padding-left: ${helperTextListStyle == 'none' ? '0px' : '1.2em'};
+		margin-top: -1.2em;
+		list-style-type: ${helperTextListStyle};
+	`
+
+	const helperHtmlText = helperText && Array.isArray(helperText) 
+		? helperText.length ? `<ul class=${helperTextClass}>${helperText.map(t => `<li>${t}</li>`).join('')}</ul>` : ''
+		: helperText
+
+	const bordersStyle = getBorders(borders, variant)
+	const widthStyle = getWidth(width)
 	const leadingMDIcon = iconToMaterial(leadingIcon)
 	let trailingMDIcon = getCorrectTrailingIcon(trailingIcon)
 
@@ -123,9 +230,18 @@
 		}
 	}
 
+	const rootClass = css`
+		${themeStyle}
+		${fontStyle}
+		${paddingStyle}
+		${bordersStyle}
+		${widthStyle}
+		${heightStyle}
+	`
+
 </script>
 
-<div class="{rootClass} {bordersClass} {widthClass}">
+<div class="{rootClass}">
 	<Textfield
 		id={_id}
 		bind:value={value}
@@ -151,7 +267,7 @@
 
 		{#if showPasswordVisibilityIcon}
 			<div on:click={changePasswordDisplay}>
-				<div class="password-switch"></div>
+				<div class="{passwordSwitchClass}"></div>
 				<Icon class="{trailingMDIcon.class}">{trailingMDIcon.icon}</Icon>
 			</div>
 		{:else if trailingMDIcon}
@@ -159,25 +275,14 @@
 		{/if}
 	</Textfield>
 	{#if showHelperTextOnly}
-		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>{helperText||''}</HelperText>
+		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>{@html helperHtmlText||''}</HelperText>
 	{:else if showMaxChar}
 		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>
-			{helperText||''}
+			{@html helperHtmlText||''}
 			<span slot="character-counter"><CharacterCounter>0 / {maxChar}</CharacterCounter></span>
 		</HelperText>
 	{/if}
 </div>
-
-<style>
-	.password-switch {
-		width: 26px;
-		height: 100%;
-		left: auto;
-		right: 0;
-		position: absolute;
-		cursor: pointer;
-	}
-</style>
 
 
 
