@@ -162,20 +162,38 @@
 				helperText: [`label: 'Hello'`, `width: 250`]
 			}, {
 				...baseTextField,
-				label: 'Hello 40',
+				label: 'Hello',
 				height: 40,
-				helperText: [`label: 'Hello'`, `height: 40`]
+				labelBottomPos: 5, 
+				labelTopPos: 0, 
+				helperText: [`label: 'Hello'`, `height: 40`, `labelBottomPos: 5`, `labelTopPos: 0`],
+				outlined: {
+					labelBottomPos: 7, 
+					labelTopPos: -7, 
+					helperText: [`label: 'Hello'`, `height: 40`, `labelBottomPos: 7`, `labelTopPos: -7`]
+				}
+			}, {
+				...baseTextField,
+				label: 'Hello',
+				height: 80,
+				labelBottomPos: -11, 
+				labelTopPos: 11, 
+				helperText: [`label: 'Hello'`, `height: 80`, `labelBottomPos: -11`, `labelTopPos: 11`]
 			}, {
 				...baseTextField,
 				label: 'Hello 80',
 				height: 80,
-				helperText: [`label: 'Hello'`, `height: 80`]
-			}, {
-				...baseTextField,
-				label: 'Hello 80',
-				height: 100,
-				fontScale: 2,
-				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 3`]
+				fontScale: 2.1,
+				labelBottomPos: -5, 
+				labelTopPos: 16, 
+				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.1`, `labelBottomPos: -5`, `labelTopPos: 16`],
+				outlined: {
+					height: 80,
+					fontScale: 2.8,
+					labelBottomPos: 3, 
+					labelTopPos: 7, 
+					helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.8`, `labelBottomPos: 3`, `labelTopPos: 7`],
+				}
 			}, {
 				...baseTextField,
 				label: 'Hello',
@@ -191,8 +209,10 @@
 		]
 		
 		variants.forEach(createTextBasic)
-		variants.forEach(v => createTextFilled({ ...v, variant:'filled' }))
-		variants.forEach(v => createTextOutlined({ ...v, variant:'outlined' }))
+		variants.forEach(createTextFilled)
+		variants.forEach(v => createTextOutlined(v.outlined 
+			? { ...v, variant:'outlined', ...v.outlined } 
+			: { ...v, variant:'outlined' } ))
 
 	</script>
 </body>

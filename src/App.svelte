@@ -4,10 +4,11 @@
 	import { getId } from './utils/component.js'
 	import { version } from '../package.json'
 
-	export let forms
+	export let forms = null
+	export let name = 'openform'
 	export let plugins = []
 
-	const id = getId()
+	const id = `${name}_${getId()}`
 
 	/**
 	 * Gets the form fiels with using the correct plugin. 

@@ -13,6 +13,7 @@
 <script>
 	const DEFAULT_MATERIAL_ICON_CLASS = 'material-icons-outlined'
 	const DEFAULT_HEIGHT = 56
+	const LABEL_BOTTOM_POS_OFFSET = 18
 
 	/* 
 	=======================================================
@@ -22,27 +23,29 @@
 	// Meta
 	export let id = ''
 	// Content
-	export let label
-	export let placeholder
+	export let label = null
+	export let placeholder = null
 	export let value = ''
 	export let type = 'text' // 'text', 'textarea', 'number', 'date', 'datetime' (this includes hours), 'password', 'email'
 	export let helperText = '' // This can also be an array, in which case each item represents a new line
-	export let leadingIcon // all icon's name at https://material.io/resources/icons/?style=baseline
-	export let trailingIcon // all icon's name at https://material.io/resources/icons/?style=baseline
+	export let leadingIcon = null // all icon's name at https://material.io/resources/icons/?style=baseline
+	export let trailingIcon = null // all icon's name at https://material.io/resources/icons/?style=baseline
 	// Style
 	export let variant = 'underlined' // 'underlined' (default), 'outlined', 'filled'
 	export let dense = false 
 	export let primary = defaultTheme.palette.primary.main
 	export let error = defaultTheme.palette.error.main
-	export let width // Can number (unit px) or string. If string, then this is CSS (e.g., '100%', 'calc(100% - 12px)')
+	export let width = null // Can number (unit px) or string. If string, then this is CSS (e.g., '100%', 'calc(100% - 12px)')
 	export let height = DEFAULT_HEIGHT
 	export let padding = 10
 	export let helperTextAlwaysOn
-	export let borders
+	export let borders = null
 	export let fontScale = 1
+	export let labelTopPos = 0
+	export let labelBottomPos = 0
 	export let helperTextListStyle = 'none' // CSS value for the 'list-style-type' property. Valid values: 'disc' (aka bullet), 'circle', 'none', 'decimal', 'square', 'lower-latin' (e.g., 'a', 'b'), 'lower-roman' (e.g., 'i', 'ii')
 	// Behavior
-	export let maxChar
+	export let maxChar = null
 	export let invalid = false
 	export let step = 1
 	export let passwordViewable = false // When true, a trailing eye icon allows the user to switch hidden/visible password
@@ -53,6 +56,7 @@
 	=======================================================
 	*/
 	
+	import { onMount } from 'svelte'
 	import Textfield from '@smui/textfield'
 	import HelperText from '@smui/textfield/helper-text/index'
 	import Icon from '@smui/textfield/icon/index'
@@ -62,6 +66,32 @@
 	import { getId } from '../../utils/component.js'
 	import TinyColor from '../../utils/tinyColor'
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
+
+	const _id = getId()
+	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
+	// const labelOutlinedTopPos = Math.round((0.496847*height)-10.0876)
+	// const labelTopPos = Math.round((0.487637*height)-8.51976)
+	// const labelOutlinedYtranslatePerc = Math.round((-0.00130053*height*height) - (2.57357*height) + 4.22145)
+	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
+	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
+	const description = `text-field-${_id}`
+	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
+	const showHelperTextOnly = helperText && !showMaxChar
+	let fieldType = !type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type
+	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
+	const cssPadding = paddingParse(padding)
+
+	const setOutlinedLabelWidth = () => {
+		if (variant != 'outlined' || fontScale <= 1)
+			return
+
+		const labelEl = document.querySelector(`#${_id} .mdc-notched-outline__notch span`)
+		if (!labelEl)
+			return
+
+		const width = Math.round(labelEl.offsetWidth * labelDenseScale * fontScale + 8)
+		labelEl.parentElement.classList.add(css`width: ${width}px !important;`)
+	}
 
 	const getBorders = (borders, variant) => {
 		if (borders === undefined || borders === null)
@@ -123,19 +153,6 @@
 			return trailingMDIcon
 	}
 
-	const _id = getId()
-	const description = `text-field-${_id}`
-	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
-	const showHelperTextOnly = helperText && !showMaxChar
-	
-	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
-	const labelOutlinedTopPos = Math.round((0.496847*height)-10.0876)
-	const labelTopPos = Math.round((0.487637*height)-8.51976)
-	const labelOutlinedYtranslatePerc = Math.round((-0.00130053*height*height) - (2.57357*height) + 4.22145)
-	const labelDenseScale = dense ? 0.8 : 0.75
-	let fieldType = !type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type
-	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
-	const cssPadding = paddingParse(padding)
 	const themeStyle = `
 		--mdc-theme-primary: ${primary};
 		--mdc-theme-error: ${error};
@@ -149,39 +166,23 @@
 			font-size: ${fontScale}rem;
 		}
 	`
-// mdc-floating-label
+	
 	const heightStyle = `
 		& label.mdc-text-field {
 			height: ${height}px;
 		}
+	`
 
-		${height == DEFAULT_HEIGHT ? '' : variant == 'outlined' 
-		? `
-			& .mdc-text-field--outlined {
-				& .mdc-floating-label {
-					top: ${labelOutlinedTopPos}px;
-				}
-				& .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
-					transform: translateY(${labelOutlinedYtranslatePerc}%) scale(${labelDenseScale});
-				}
-			}
-		`
-		: variant == 'filler' ? `
-			& .mdc-text-field .mdc-floating-label {
-				top: ${labelTopPos}px;
-			}
-		`
-		: `
-			& .mdc-text-field .mdc-floating-label {
-				top: ${labelTopPos}px;
-				${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
+	const translateYOffset = variant == 'outlined' ? (dense ? 24 : 27) : (dense ? 13 : 10)
+	const textStyle = `
+		& .mdc-floating-label {
+			top: ${LABEL_BOTTOM_POS_OFFSET - labelBottomPos}px;
+			${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
+		}
 
-				&.mdc-floating-label--float-above {
-					transform: translateY(-50%) scale(${labelDenseScale*fontScale}) !important;
-				}
-			}
-		` 
-	}
+		& .mdc-floating-label.mdc-floating-label--float-above {
+			transform: translateY(-${translateYOffset+labelTopPos}px) scale(${labelDenseScale*fontScale}) !important;
+		}
 	`
 
 	const paddingStyle = `
@@ -232,12 +233,17 @@
 
 	const rootClass = css`
 		${themeStyle}
+		${textStyle}
 		${fontStyle}
 		${paddingStyle}
 		${bordersStyle}
 		${widthStyle}
 		${heightStyle}
 	`
+
+	onMount(() => {
+		setOutlinedLabelWidth()
+	})
 
 </script>
 
