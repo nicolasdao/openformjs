@@ -68,10 +68,8 @@
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
 	const _id = getId()
+	let node
 	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
-	// const labelOutlinedTopPos = Math.round((0.496847*height)-10.0876)
-	// const labelTopPos = Math.round((0.487637*height)-8.51976)
-	// const labelOutlinedYtranslatePerc = Math.round((-0.00130053*height*height) - (2.57357*height) + 4.22145)
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
 	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
 	const description = `text-field-${_id}`
@@ -82,15 +80,54 @@
 	const cssPadding = paddingParse(padding)
 
 	const setOutlinedLabelWidth = () => {
-		if (variant != 'outlined' || fontScale <= 1)
+		if (variant != 'outlined')
 			return
 
-		const labelEl = document.querySelector(`#${_id} .mdc-notched-outline__notch span`)
+		const mainBox = node.querySelector(`#${_id}`)
+		if (!mainBox)
+			return
+
+		const labelContainer = mainBox.querySelector('.mdc-notched-outline__notch')
+		if (!labelContainer)
+			return labelContainer
+
+		const labelEl = labelContainer.querySelector('span')
 		if (!labelEl)
-			return
+			return 
 
-		const width = Math.round(labelEl.offsetWidth * labelDenseScale * fontScale + 8)
-		labelEl.parentElement.classList.add(css`width: ${width}px !important;`)
+		const labelRect = labelEl.getBoundingClientRect()
+		const labelBottomPos = labelRect.bottom 
+		const labelLineHeightOffset = labelRect.height * 0.2 // That's because the label's dimensions are coming from
+																  // its line-height, which is 120% bigger than the actual font.
+		const labelReducedSizeOffset = labelRect.height*(1-labelDenseScale)
+		const mainBoxTopPos = mainBox.getBoundingClientRect().top
+		const labelStartPos = labelContainer.getBoundingClientRect().left 
+
+		const distanceFromTop = labelBottomPos - mainBoxTopPos - labelLineHeightOffset - labelReducedSizeOffset
+		const distanceFromStart = labelRect.left - labelStartPos - 4
+
+		const width = Math.ceil(labelEl.offsetWidth*labelDenseScale + 8)
+		labelEl.parentElement.parentElement.classList.add(css`
+			&.mdc-notched-outline--notched .mdc-notched-outline__notch {
+				width: ${width}px !important;
+			}
+		`)
+		labelEl.parentElement.classList.add(css`
+			& .mdc-floating-label--float-above {
+				max-width: unset !important;
+				min-width: ${labelEl.offsetWidth}px !important;
+				transform: ${distanceFromStart > 15 ? `translateX(-${distanceFromStart}px)` : '' } translateY(-${distanceFromTop}px) scale(${labelDenseScale}) !important;
+			}
+		`)
+
+		// const labelEl = document.querySelector(`#${_id} .mdc-notched-outline__notch span`)
+		// if (!labelEl || !labelElgetBoundingClientRect)
+		// 	return
+
+		// labelEl.getBoundingClientRect().bottom()
+		// const width = Math.round(labelEl.offsetWidth * labelDenseScale * fontScale + 8)
+		// labelEl.parentElement.classList.add(css`width: ${width}px !important;`)
+		
 	}
 
 	const getBorders = (borders, variant) => {
@@ -174,16 +211,41 @@
 	`
 
 	const translateYOffset = variant == 'outlined' ? (dense ? 24 : 27) : (dense ? 13 : 10)
+	// const textStyle = `
+	// 	& .mdc-floating-label {
+	// 		top: ${LABEL_BOTTOM_POS_OFFSET - labelBottomPos}px;
+	// 		${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
+	// 	}
+
+	// 	& .mdc-floating-label.mdc-floating-label--float-above {
+	// 		transform: translateY(-${translateYOffset+labelTopPos}px) scale(${labelDenseScale*fontScale}) !important;
+	// 	}
+	// `
+
 	const textStyle = `
-		& .mdc-floating-label {
-			top: ${LABEL_BOTTOM_POS_OFFSET - labelBottomPos}px;
-			${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
+		& label.mdc-text-field {
+			display: flex;
 		}
 
-		& .mdc-floating-label.mdc-floating-label--float-above {
-			transform: translateY(-${translateYOffset+labelTopPos}px) scale(${labelDenseScale*fontScale}) !important;
+		& not[.mdc-notched-outline__notch] span.mdc-floating-label {
+			align-self: center;
+			font-size: ${fontScale}em;
+			line-height: 120%;
+		}
+
+		& .mdc-notched-outline__notch {
+			display:flex;
+			align-items: center;
+			padding-right: 0px !important;
+
+			& span.mdc-floating-label {
+				top: unset !important;
+				font-size: ${fontScale}em;
+				line-height: 120%;
+			}
 		}
 	`
+
 
 	const paddingStyle = `
 		padding-top: ${cssPadding.top}px;
@@ -247,7 +309,7 @@
 
 </script>
 
-<div class="{rootClass}">
+<div class="{rootClass}" bind:this={node}>
 	<Textfield
 		id={_id}
 		bind:value={value}
