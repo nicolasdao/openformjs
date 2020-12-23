@@ -13,7 +13,6 @@
 <script>
 	const DEFAULT_MATERIAL_ICON_CLASS = 'material-icons-outlined'
 	const DEFAULT_HEIGHT = 56
-	const LABEL_BOTTOM_POS_OFFSET = 18
 
 	/* 
 	=======================================================
@@ -41,8 +40,6 @@
 	export let helperTextAlwaysOn
 	export let borders = null
 	export let fontScale = 1
-	export let labelTopPos = 0
-	export let labelBottomPos = 0
 	export let helperTextListStyle = 'none' // CSS value for the 'list-style-type' property. Valid values: 'disc' (aka bullet), 'circle', 'none', 'decimal', 'square', 'lower-latin' (e.g., 'a', 'b'), 'lower-roman' (e.g., 'i', 'ii')
 	// Behavior
 	export let maxChar = null
@@ -68,6 +65,9 @@
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
 	const _id = getId()
+	const isOutlined = variant == 'outlined'
+	const isDate = type == 'datetime' || type == 'date'
+	let explicitValue = isOutlined ? '' : value
 	let node
 	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
@@ -75,14 +75,31 @@
 	const description = `text-field-${_id}`
 	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
 	const showHelperTextOnly = helperText && !showMaxChar
-	let fieldType = !type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type
+	let fieldType = isOutlined
+		? (!type || type == 'text' || isDate ? undefined : type)
+		: (!type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type)
 	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
 	const cssPadding = paddingParse(padding)
 
-	const setOutlinedLabelWidth = () => {
-		if (variant != 'outlined')
+	// Creates the CSS style to resize the label when the text field is not outlined and the font is not the default. 
+	const setLabelStyle = () => {
+		if (fontScale <= 1)
+			return 
+
+		const labelEl = node.querySelector('span.mdc-floating-label')
+		if (!labelEl)
 			return
 
+
+		// labelEl.classList.add(css`
+		// 	font-size: ${fontScale}em;
+		// 	line-height: 120%;
+		// `)
+	}
+
+	// Creates the CSS style to dynamically animate the label when the text field is outlined. 
+	const setOutlinedLabelStyle = () => {
+		// 1. Confirm the DOM is there
 		const mainBox = node.querySelector(`#${_id}`)
 		if (!mainBox)
 			return
@@ -95,10 +112,12 @@
 		if (!labelEl)
 			return 
 
+		// 2. Gets the current position of the label and the text field top line + calculate the distances 
+		// to translate the label from its current position to the top left corner of the text field.
 		const labelRect = labelEl.getBoundingClientRect()
 		const labelBottomPos = labelRect.bottom 
-		const labelLineHeightOffset = labelRect.height * 0.2 // That's because the label's dimensions are coming from
-																  // its line-height, which is 120% bigger than the actual font.
+		const labelLineHeightOffset = labelRect.height * 0.2	// That's because the label's dimensions are coming from
+		// its line-height, which is 120% bigger than the actual font.
 		const labelReducedSizeOffset = labelRect.height*(1-labelDenseScale)
 		const mainBoxTopPos = mainBox.getBoundingClientRect().top
 		const labelStartPos = labelContainer.getBoundingClientRect().left 
@@ -106,6 +125,7 @@
 		const distanceFromTop = labelBottomPos - mainBoxTopPos - labelLineHeightOffset - labelReducedSizeOffset
 		const distanceFromStart = labelRect.left - labelStartPos - 4
 
+		// 3. Apply the CSS style
 		const width = Math.ceil(labelEl.offsetWidth*labelDenseScale + 8)
 		labelEl.parentElement.parentElement.classList.add(css`
 			&.mdc-notched-outline--notched .mdc-notched-outline__notch {
@@ -120,14 +140,24 @@
 			}
 		`)
 
-		// const labelEl = document.querySelector(`#${_id} .mdc-notched-outline__notch span`)
-		// if (!labelEl || !labelElgetBoundingClientRect)
-		// 	return
+		// If this is a date, then position the label to the top left.
+		if (isDate) {
+			labelEl.parentElement.parentElement.classList.add('mdc-notched-outline--notched')
+			labelEl.classList.add('mdc-floating-label--float-above')
+		}
+	}
 
-		// labelEl.getBoundingClientRect().bottom()
-		// const width = Math.round(labelEl.offsetWidth * labelDenseScale * fontScale + 8)
-		// labelEl.parentElement.classList.add(css`width: ${width}px !important;`)
-		
+	// This hack is needed for outlined text field so the label position can be calculated before the value
+	// is set. Indeed, when the value is set, the label moves.
+	const setOutlinedValue = val => explicitValue = val
+
+	// This hack is needed for outlined date field so the label position can be calculated before the value
+	// is set. Indeed, when the value is set, the label moves.
+	const setOutlinedDateFieldType = type => {
+		if (type == 'datetime')
+			fieldType = 'datetime-local'
+		else if (type == 'date')
+			fieldType = 'date'
 	}
 
 	const getBorders = (borders, variant) => {
@@ -141,19 +171,32 @@
 					border-radius: ${topLeft}px ${topRight}px 0px 0px;
 				}
 			`
-		else if (variant == 'outlined') {
+		else if (isOutlined) {
 			const customLeadingWidth = (topLeft && topLeft > 12) || (bottomLeft && bottomLeft > 12)
 				? (topLeft || 0) > (bottomLeft || 0) ? topLeft : bottomLeft
-				: null
-			return `
-				& .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading {
-					border-radius: ${topLeft}px 0px 0px ${bottomLeft}px;
-					${customLeadingWidth ? `width: ${customLeadingWidth}px` : '' }
-				}
+				: 0
 
-				& .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing {
-					border-radius: 0px ${topRight}px ${bottomRight}px 0px;
+			const customLeftPaddingInput = customLeadingWidth > 12 
+				? 16 + customLeadingWidth - 12 // 16 is the original LP, 12 is the original leading width
+				: 16
+			return `
+				& .mdc-text-field--outlined {
+					& .mdc-text-field__input {
+						padding: 12px 16px 14px ${customLeftPaddingInput}px;
+					}
+
+					& .mdc-notched-outline {
+						& .mdc-notched-outline__leading {
+							border-radius: ${topLeft}px 0px 0px ${bottomLeft}px;
+							${customLeadingWidth ? `width: ${customLeadingWidth}px` : '' }
+						}
+
+						& .mdc-notched-outline__trailing {
+							border-radius: 0px ${topRight}px ${bottomRight}px 0px;
+						}
+					}
 				}
+			}
 			`
 		} else
 			return ''
@@ -193,7 +236,7 @@
 	const themeStyle = `
 		--mdc-theme-primary: ${primary};
 		--mdc-theme-error: ${error};
-		& .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+		& .mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid) .mdc-floating-label {
 			color: ${labelColor};
 		}
 	`
@@ -210,28 +253,23 @@
 		}
 	`
 
-	const translateYOffset = variant == 'outlined' ? (dense ? 24 : 27) : (dense ? 13 : 10)
-	// const textStyle = `
-	// 	& .mdc-floating-label {
-	// 		top: ${LABEL_BOTTOM_POS_OFFSET - labelBottomPos}px;
-	// 		${fontScale == 1 ? '' : `transform: scale(${fontScale});`}
-	// 	}
-
-	// 	& .mdc-floating-label.mdc-floating-label--float-above {
-	// 		transform: translateY(-${translateYOffset+labelTopPos}px) scale(${labelDenseScale*fontScale}) !important;
-	// 	}
-	// `
-
 	const textStyle = `
 		& label.mdc-text-field {
 			display: flex;
 		}
 
-		& not[.mdc-notched-outline__notch] span.mdc-floating-label {
+		& span.mdc-floating-label {
+			top: unset !important;
 			align-self: center;
 			font-size: ${fontScale}em;
 			line-height: 120%;
 		}
+
+		${isOutlined ? '' : `
+		& .mdc-floating-label--float-above {
+			transform: translateY(-50%) scale(${labelDenseScale});
+		}
+		`}
 
 		& .mdc-notched-outline__notch {
 			display:flex;
@@ -246,7 +284,6 @@
 		}
 	`
 
-
 	const paddingStyle = `
 		padding-top: ${cssPadding.top}px;
 		padding-bottom: ${cssPadding.bottom}px;
@@ -255,7 +292,7 @@
 	`
 
 	const passwordSwitchClass = css`
-		width: ${variant == 'outlined' ? 48 : 26}px;
+		width: ${isOutlined ? 48 : 26}px;
 		height: 100%;
 		left: auto;
 		right: 0;
@@ -304,7 +341,13 @@
 	`
 
 	onMount(() => {
-		setOutlinedLabelWidth()
+		if (isOutlined) {
+			setOutlinedLabelStyle()
+			setOutlinedValue(value)
+			setOutlinedDateFieldType(type)
+		} else {
+			setLabelStyle()
+		}
 	})
 
 </script>
@@ -312,7 +355,7 @@
 <div class="{rootClass}" bind:this={node}>
 	<Textfield
 		id={_id}
-		bind:value={value}
+		bind:value={explicitValue}
 		class="shaped"
 		label={label}
 		invalid={invalid || undefined}

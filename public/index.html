@@ -64,6 +64,11 @@
 				helperText: `label: 'Hello'`
 			}, {
 				...baseTextField,
+				label: 'Hello',
+				value: 'World',
+				helperText: [`label: 'Hello'`, `value: 'world'`]
+			}, {
+				...baseTextField,
 				label: 'Error',
 				invalid: true,
 				helperText: [`label: 'Error'`, `invalid: true`]
@@ -121,11 +126,6 @@
 				helperText: [`label: 'Hello'`, `type: 'email'`]
 			}, {
 				...baseTextField,
-				label: 'Password',
-				type: 'password',
-				helperText: [`label: 'Password'`, `type: 'password'`]
-			}, {
-				...baseTextField,
 				label: 'Email',
 				type: 'email',
 				leadingIcon: 'email-outlined',
@@ -158,47 +158,29 @@
 			}, {
 				...baseTextField,
 				label: 'Hello',
-				width: 250,
-				helperText: [`label: 'Hello'`, `width: 250`]
-			}, {
-				...baseTextField,
-				label: 'Hello',
 				height: 40,
-				labelBottomPos: 5, 
-				labelTopPos: 0, 
-				helperText: [`label: 'Hello'`, `height: 40`, `labelBottomPos: 5`, `labelTopPos: 0`],
-				outlined: {
-					labelBottomPos: 7, 
-					labelTopPos: -7, 
-					helperText: [`label: 'Hello'`, `height: 40`, `labelBottomPos: 7`, `labelTopPos: -7`]
-				}
+				helperText: [`label: 'Hello'`, `height: 40`],
 			}, {
 				...baseTextField,
 				label: 'Hello',
 				height: 80,
-				labelBottomPos: -11, 
-				labelTopPos: 11, 
-				helperText: [`label: 'Hello'`, `height: 80`, `labelBottomPos: -11`, `labelTopPos: 11`]
+				helperText: [`label: 'Hello'`, `height: 80`]
 			}, {
 				...baseTextField,
 				label: 'gunter 80',
 				height: 80,
 				fontScale: 2.1,
-				labelBottomPos: -5, 
-				labelTopPos: 16, 
-				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.1`, `labelBottomPos: -5`, `labelTopPos: 16`],
+				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.1`],
 				outlined: {
 					height: 80,
 					fontScale: 2.8,
-					labelBottomPos: 3, 
-					labelTopPos: 7, 
-					helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.8`, `labelBottomPos: 3`, `labelTopPos: 7`],
+					helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.8`],
 				}
 			}, {
 				...baseTextField,
 				label: 'Hello',
-				width: '100%',
-				helperText: [`label: 'Hello'`, `width: 100%`]
+				width: 200,
+				helperText: [`label: 'Hello'`, `width: 200`]
 			}, {
 				...baseTextField,
 				label: 'Hello',
