@@ -13,6 +13,7 @@
 <script>
 	const DEFAULT_MATERIAL_ICON_CLASS = 'material-icons-outlined'
 	const DEFAULT_HEIGHT = 56
+	const DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH = 12 // That's the block that contains the top-left and bottom-left rounded corners.
 
 	/* 
 	=======================================================
@@ -66,10 +67,14 @@
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
 	const _id = getId()
+	let node
+	
+	
 	const isOutlined = variant == 'outlined'
+	const isUnderlined = !variant || variant == 'underlined'
+	const isFilled = variant == 'filled'
 	const isDate = type == 'datetime' || type == 'date'
 	let explicitValue = isOutlined ? '' : value
-	let node
 	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
 	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
@@ -82,6 +87,8 @@
 		: (!type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type)
 	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
 	const cssPadding = paddingParse(padding)
+	// Icon dimensions (default is 24px width)
+	const iconWidth = fontScale <= 1 ? 24 : Math.round(fontScale*24)
 
 	// Creates the CSS style to resize the label when the text field is not outlined and the font is not the default. 
 	const setLabelUpStyle = () => {
@@ -172,6 +179,19 @@
 			fieldType = 'date'
 	}
 
+	const getOutlinedLeadingBlockWidth = borders => {
+		if (!borders)
+			return DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH
+
+		const { topLeft, bottomLeft } = cornerParse(borders)
+
+		const value = (topLeft && topLeft > DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH) || (bottomLeft && bottomLeft > DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH)
+			? (topLeft || 0) > (bottomLeft || 0) ? topLeft : bottomLeft
+			: DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH
+
+		return Math.round(value > height/2 ? height/2 : value)
+	}
+
 	const getBorders = (borders, variant) => {
 		if (borders === undefined || borders === null)
 			return ''
@@ -184,13 +204,9 @@
 				}
 			`
 		else if (isOutlined) {
-			const customLeadingWidth = (topLeft && topLeft > 12) || (bottomLeft && bottomLeft > 12)
-				? (topLeft || 0) > (bottomLeft || 0) ? topLeft : bottomLeft
-				: 0
-
-			const customLeftPaddingInput = customLeadingWidth > 12 
-				? 16 + customLeadingWidth - 12 // 16 is the original LP, 12 is the original leading width
-				: 16
+			const outlinedLeadingBlockWidth = getOutlinedLeadingBlockWidth(borders)
+			
+			const customLeftPaddingInput = 16 + outlinedLeadingBlockWidth - DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH // 16 is the original LP, 12 is the original leading width
 			return `
 				& .mdc-text-field--outlined {
 					& .mdc-text-field__input {
@@ -200,7 +216,7 @@
 					& .mdc-notched-outline {
 						& .mdc-notched-outline__leading {
 							border-radius: ${topLeft}px 0px 0px ${bottomLeft}px;
-							${customLeadingWidth ? `width: ${customLeadingWidth}px` : '' }
+							width: ${outlinedLeadingBlockWidth}px;
 						}
 
 						& .mdc-notched-outline__trailing {
@@ -208,7 +224,6 @@
 						}
 					}
 				}
-			}
 			`
 		} else
 			return ''
@@ -236,6 +251,54 @@
 			return ''
 	}
 
+	const getPaddingLabel = () => {
+		if (!leadingIcon) {
+			if (isUnderlined)
+				return 0 // underlined label with no leading icon starts at 0px.
+			else if (isFilled)
+				return 16 // filled label with no leading icon starts at 16px.
+			else { // outlined label with no leading icon starts at 16px if the border-radius is lower than 16.
+				const outlinedLeadingBlockWidth = getOutlinedLeadingBlockWidth(borders)
+				return outlinedLeadingBlockWidth < 16 ? 16 : outlinedLeadingBlockWidth
+			}
+		} else {
+			const paddingFromIconStart = Math.round(1.35*iconWidth)
+			if (isUnderlined)
+				return paddingFromIconStart
+			else if (isFilled)
+				return 16 + paddingFromIconStart
+			else {
+				const outlinedLeadingBlockWidth = getOutlinedLeadingBlockWidth(borders)
+				return 16 + paddingFromIconStart - (outlinedLeadingBlockWidth > DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH ? outlinedLeadingBlockWidth : DEFAULT_OUTLINED_LEADING_BLOCK_WIDTH)
+			}
+		}
+	}
+
+	const getPaddingInput = () => {
+		if (!leadingIcon) {
+			if (isUnderlined)
+				return 0 // underlined label with no leading icon starts at 0px.
+			else if (isFilled)
+				return 16 // filled label with no leading icon starts at 16px.
+			else { // outlined label with no leading icon starts at 16px if the border-radius is lower than 16.
+				const outlinedLeadingBlockWidth = getOutlinedLeadingBlockWidth(borders)
+				return outlinedLeadingBlockWidth < 16 ? 16 : outlinedLeadingBlockWidth
+			}
+		} else {
+			const paddingFromIconStart = Math.round(1.35*iconWidth)
+			if (isUnderlined)
+				return paddingFromIconStart
+			else if (isFilled)
+				return 16 + paddingFromIconStart
+			else {
+				return 16 + paddingFromIconStart
+			}
+		}
+	}
+
+	const paddingLabel = getPaddingLabel()
+	const paddingInput = getPaddingInput()
+
 	const showPasswordVisibilityIcon = type == 'password' && passwordViewable
 	const getCorrectTrailingIcon = icon => {
 		const trailingMDIcon = iconToMaterial(icon)
@@ -255,13 +318,54 @@
 
 	const fontStyle = fontScale == 1 ? '' : `
 		& input {
-			font-size: ${fontScale}rem;
+			font-size: ${fontScale}em;
 		}
+
+		& .mdc-floating-label--float-above {
+			font-size: ${fontScale}em !important;
+		}
+	`
+
+	const leadingIconStyle = !leadingIcon ? '' : `
+		& i.mdc-text-field__icon {
+			font-size: ${iconWidth}px;	
+		}
+
+		& .mdc-text-field--with-leading-icon {
+			& .mdc-floating-label {
+				left: ${paddingLabel}px;
+			}
+
+			& .mdc-text-field__input {
+				padding-left: ${paddingInput}px !important;
+			}
+		}
+
+		& label > div:first-child {
+			left: 16px;
+			right: auto;
+			position: absolute;
+			height: 100%;
+			width: ${iconWidth}px;
+			display: flex;
+			align-items: center;
+		}
+
+		& label.smui-text-field--standard > div:first-child {
+			left: 0px;
+		}
+
+    	& i.mdc-text-field__icon {
+    		left: unset !important;
+			right: unset !important;
+			position: unset !important;
+			bottom: unset !important;
+    	}
 	`
 	
 	const heightStyle = `
 		& label.mdc-text-field {
-			height: ${height}px;
+			height: ${height}px !important;
 		}
 	`
 
@@ -346,6 +450,7 @@
 		${themeStyle}
 		${textStyle}
 		${fontStyle}
+		${leadingIconStyle}
 		${paddingStyle}
 		${bordersStyle}
 		${widthStyle}

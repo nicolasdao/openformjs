@@ -7,12 +7,12 @@ __*Openform*__ is a front-end JS package that helps building forms. It is built 
 >	- [Install](#install)
 >	- [Creating a form](#creating-a-form)
 >	- [Updating a form](#updating-a-form)
-> * [FAQ](#faq)
->	- [What's the icon's naming convention?](#whats-the-icons-naming-convention)
->	- [Where is the list with all the icon names?](#where-is-the-list-with-all-the-icon-names?)
 > * [Dev](#dev)
 >	- [Run locally](#run-locally)
 >	- [Deploy](#deploy)
+> * [FAQ](#faq)
+>	- [What's the icon's naming convention?](#whats-the-icons-naming-convention)
+>	- [Where is the list with all the icon names?](#where-is-the-list-with-all-the-icon-names?)
 
 # Getting started
 ## Install
@@ -127,23 +127,6 @@ const form = new FormJS({
 form.$set({ forms: updatedForms })
 ```
 
-# FAQ
-## What's the icon's naming convention?
-
-All icon names can be found [here](https://material.io/resources/icons/?style=baseline). By default, those icons are filled. Technically, this means that the class the `i` tag uses is the `material-icons`. There are five different classes of icons, each of them associated with a CSS class:
-1. `filled`: Class `material-icons` 
-2. `outlined`: Class `material-icons-outlined` 
-3. `round`: Class `material-icons-round` 
-4. `sharp`: Class `material-icons-sharp` 
-5. `two-tone`: Class `material-icons-two-tone`  
-
-To specify a icon including its class, use the icon's name followed by a class (e.g., `email-outlined` or `email-two-tone`).
-
-
-## Where is the list with all the icon names?
-
-https://material.io/resources/icons/?style=baseline
-
 # Dev
 ## Run locally
 To run this project locally:
@@ -176,4 +159,20 @@ npm run rls <new version>
 npm run push
 ```
 
+# FAQ
+## What's the icon's naming convention?
+
+All icon names can be found [here](https://material.io/resources/icons/?style=baseline). By default, those icons are filled. Technically, this means that the class the `i` tag uses is the `material-icons`. There are five different classes of icons, each of them associated with a CSS class:
+1. `filled`: Class `material-icons` 
+2. `outlined`: Class `material-icons-outlined` 
+3. `round`: Class `material-icons-round` 
+4. `sharp`: Class `material-icons-sharp` 
+5. `two-tone`: Class `material-icons-two-tone`  
+
+To specify a icon including its class, use the icon's name followed by a class (e.g., `email-outlined` or `email-two-tone`).
+
+
+## Where is the list with all the icon names?
+
+https://material.io/resources/icons/?style=baseline
 
