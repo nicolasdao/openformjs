@@ -362,6 +362,20 @@
 			bottom: unset !important;
     	}
 	`
+
+	const trailingIconStyle = !trailingIcon ? '' : `
+		& .mdc-text-field--with-trailing-icon .mdc-text-field__icon {
+			bottom: unset !important;
+			align-self: center;
+			font-size: ${iconWidth}px;
+		}
+
+		${fontScale <= 1 ? '' : `
+		& .mdc-text-field__input {
+			width: calc(100% - ${iconWidth/2}px);
+		}
+		`}
+	`
 	
 	const heightStyle = `
 		& label.mdc-text-field {
@@ -451,6 +465,7 @@
 		${textStyle}
 		${fontStyle}
 		${leadingIconStyle}
+		${trailingIconStyle}
 		${paddingStyle}
 		${bordersStyle}
 		${widthStyle}
@@ -494,7 +509,7 @@
 		{/if}
 
 		{#if showPasswordVisibilityIcon}
-			<div on:click={changePasswordDisplay}>
+			<div on:click={changePasswordDisplay} style="display: flex;">
 				<div class="{passwordSwitchClass}"></div>
 				<Icon class="{trailingMDIcon.class}">{trailingMDIcon.icon}</Icon>
 			</div>
