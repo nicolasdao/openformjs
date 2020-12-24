@@ -69,6 +69,11 @@
 				helperText: [`label: 'Hello'`, `value: 'world'`]
 			}, {
 				...baseTextField,
+				label: 'Hello',
+				labelUp: true,
+				helperText: [`label: 'Hello'`, `labelUp: true`]
+			}, {
+				...baseTextField,
 				label: 'Error',
 				invalid: true,
 				helperText: [`label: 'Error'`, `invalid: true`]
@@ -170,11 +175,14 @@
 				label: 'gunter 80',
 				height: 80,
 				fontScale: 2.1,
-				helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.1`],
+				helperText: [`label: 'gunter 80'`, `height: 80`, `fontScale: 2.1`],
+				filled: {
+					fontScale: 1.6,
+					helperText: [`label: 'gunter 80'`, `height: 80`, `fontScale: 1.6`],
+				},
 				outlined: {
-					height: 80,
 					fontScale: 2.8,
-					helperText: [`label: 'Hello'`, `height: 80`, `fontScale: 2.8`],
+					helperText: [`label: 'gunter 80'`, `height: 80`, `fontScale: 2.8`],
 				}
 			}, {
 				...baseTextField,
@@ -191,7 +199,9 @@
 		]
 		
 		variants.forEach(createTextBasic)
-		variants.forEach(createTextFilled)
+		variants.forEach(v => createTextFilled(v.filled 
+			? { ...v, variant:'filled', ...v.filled } 
+			: { ...v, variant:'filled' } ))
 		variants.forEach(v => createTextOutlined(v.outlined 
 			? { ...v, variant:'outlined', ...v.outlined } 
 			: { ...v, variant:'outlined' } ))

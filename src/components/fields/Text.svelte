@@ -31,6 +31,7 @@
 	export let trailingIcon = null // all icon's name at https://material.io/resources/icons/?style=baseline
 	// Style
 	export let variant = 'underlined' // 'underlined' (default), 'outlined', 'filled'
+	export let labelUp = false
 	export let dense = false 
 	export let primary = defaultTheme.palette.primary.main
 	export let error = defaultTheme.palette.error.main
@@ -72,6 +73,7 @@
 	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
 	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
+	const transformLabelToTopLeft = `transform: translateY(-57%) scale(${labelDenseScale});`
 	const description = `text-field-${_id}`
 	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
 	const showHelperTextOnly = helperText && !showMaxChar
@@ -82,8 +84,8 @@
 	const cssPadding = paddingParse(padding)
 
 	// Creates the CSS style to resize the label when the text field is not outlined and the font is not the default. 
-	const setLabelStyle = () => {
-		if (fontScale <= 1)
+	const setLabelUpStyle = () => {
+		if (!labelUp)
 			return 
 
 		const labelEl = node.querySelector('span.mdc-floating-label')
@@ -91,10 +93,7 @@
 			return
 
 
-		// labelEl.classList.add(css`
-		// 	font-size: ${fontScale}em;
-		// 	line-height: 120%;
-		// `)
+		labelEl.classList.add(css(transformLabelToTopLeft))
 	}
 
 	// Creates the CSS style to dynamically animate the label when the text field is outlined. 
@@ -127,6 +126,9 @@
 
 		// 3. Apply the CSS style
 		const width = Math.ceil(labelEl.offsetWidth*labelDenseScale + 8)
+
+		const labelOutlinedTopLeftTransform = `transform: ${distanceFromStart > 15 ? `translateX(-${distanceFromStart}px)` : '' } translateY(-${distanceFromTop}px) scale(${labelDenseScale}) !important;`
+
 		labelEl.parentElement.parentElement.classList.add(css`
 			&.mdc-notched-outline--notched .mdc-notched-outline__notch {
 				width: ${width}px !important;
@@ -136,7 +138,7 @@
 			& .mdc-floating-label--float-above {
 				max-width: unset !important;
 				min-width: ${labelEl.offsetWidth}px !important;
-				transform: ${distanceFromStart > 15 ? `translateX(-${distanceFromStart}px)` : '' } translateY(-${distanceFromTop}px) scale(${labelDenseScale}) !important;
+				${labelOutlinedTopLeftTransform}
 			}
 		`)
 
@@ -144,6 +146,16 @@
 		if (isDate) {
 			labelEl.parentElement.parentElement.classList.add('mdc-notched-outline--notched')
 			labelEl.classList.add('mdc-floating-label--float-above')
+		} else if (labelUp) {
+			labelEl.parentElement.classList.add(css`
+				padding-left: 0;
+				border-top: none;
+			`)
+			labelEl.classList.add(css(`
+				max-width: unset !important;
+				min-width: 38px !important;
+				${labelOutlinedTopLeftTransform}
+			`))
 		}
 	}
 
@@ -267,7 +279,7 @@
 
 		${isOutlined ? '' : `
 		& .mdc-floating-label--float-above {
-			transform: translateY(-50%) scale(${labelDenseScale});
+			${transformLabelToTopLeft}
 		}
 		`}
 
@@ -346,7 +358,7 @@
 			setOutlinedValue(value)
 			setOutlinedDateFieldType(type)
 		} else {
-			setLabelStyle()
+			setLabelUpStyle()
 		}
 	})
 
