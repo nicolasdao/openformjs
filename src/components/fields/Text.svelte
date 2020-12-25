@@ -78,7 +78,8 @@
 	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
 	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
-	const transformLabelToTopLeft = `transform: translateY(-57%) scale(${labelDenseScale});`
+	const animationSuffix = `${labelDenseScale}`.replace('0.','')
+	const transformLabelToTopLeft = x => `transform: ${x === undefined ? '' : `translateX(${x}%)`} translateY(-57%) scale(${labelDenseScale});`
 	const description = `text-field-${_id}`
 	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
 	const showHelperTextOnly = helperText && !showMaxChar
@@ -100,7 +101,7 @@
 			return
 
 
-		labelEl.classList.add(css(transformLabelToTopLeft))
+		labelEl.classList.add(css(transformLabelToTopLeft()))
 	}
 
 	// Creates the CSS style to dynamically animate the label when the text field is outlined. 
@@ -355,12 +356,12 @@
 			left: 0px;
 		}
 
-    	& i.mdc-text-field__icon {
-    		left: unset !important;
+			& i.mdc-text-field__icon {
+				left: unset !important;
 			right: unset !important;
 			position: unset !important;
 			bottom: unset !important;
-    	}
+			}
 	`
 
 	const trailingIconStyle = !trailingIcon ? '' : `
@@ -394,12 +395,6 @@
 			font-size: ${fontScale}em;
 			line-height: 120%;
 		}
-
-		${isOutlined ? '' : `
-		& .mdc-floating-label--float-above {
-			${transformLabelToTopLeft}
-		}
-		`}
 
 		& .mdc-notched-outline__notch {
 			display:flex;
@@ -460,6 +455,43 @@
 		}
 	}
 
+	// This bugs is part of the svelte-material-ui 1.0.0. The borders transitions on focus are not smoothed.
+	const fixOutlinedBorderFlickeringStyle = !isOutlined ? '' : `
+		& .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+			transition: unset !important;
+		}
+	`
+
+	const labelUpStyle = isOutlined ? '' : `
+		& .mdc-floating-label--float-above {
+			${transformLabelToTopLeft()}
+		}
+
+		& .mdc-floating-label--shake {
+			animation: mdc-floating-label-shake-float-above-standard-${animationSuffix} .25s 1 !important;
+		}
+
+		@keyframes mdc-floating-label-shake-float-above-standard-${animationSuffix} {
+			0% {
+					${transformLabelToTopLeft(0)}
+			}
+
+			33% {
+					animation-timing-function: cubic-bezier(.5, 0, .70173, .49582);
+					${transformLabelToTopLeft(-6)}
+			}
+
+			66% {
+					animation-timing-function: cubic-bezier(.30244, .38135, .55, .95635);
+					${transformLabelToTopLeft(6)}
+			}
+
+			to {
+					${transformLabelToTopLeft(0)}
+			}
+		}
+	`
+
 	const rootClass = css`
 		${themeStyle}
 		${textStyle}
@@ -470,6 +502,8 @@
 		${bordersStyle}
 		${widthStyle}
 		${heightStyle}
+		${fixOutlinedBorderFlickeringStyle}
+		${labelUpStyle}
 	`
 
 	onMount(() => {
