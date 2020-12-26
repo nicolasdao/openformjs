@@ -26,7 +26,7 @@
 	export let label = null
 	export let placeholder = null
 	export let value = ''
-	export let type = 'text' // 'text', 'textarea', 'number', 'date', 'datetime' (this includes hours), 'password', 'email'
+	export let type = 'text' // 'text', 'textarea', 'number', 'date', 'datetime' (this includes hours), 'password', 'email', 'file'
 	export let helperText = '' // This can also be an array, in which case each item represents a new line
 	export let leadingIcon = null // all icon's name at https://material.io/resources/icons/?style=baseline
 	export let trailingIcon = null // all icon's name at https://material.io/resources/icons/?style=baseline
@@ -42,6 +42,7 @@
 	export let helperTextAlwaysOn
 	export let borders = null
 	export let fontScale = 1
+	export let fontFamily = ''
 	export let helperTextListStyle = 'none' // CSS value for the 'list-style-type' property. Valid values: 'disc' (aka bullet), 'circle', 'none', 'decimal', 'square', 'lower-latin' (e.g., 'a', 'b'), 'lower-roman' (e.g., 'i', 'ii')
 	// Behavior
 	export let maxChar = null
@@ -66,9 +67,9 @@
 	import TinyColor from '../../utils/tinyColor'
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
+	// State values
 	const _id = getId()
 	let node
-	
 	
 	const isOutlined = variant == 'outlined'
 	const isUnderlined = !variant || variant == 'underlined'
@@ -93,7 +94,7 @@
 
 	// Creates the CSS style to resize the label when the text field is not outlined and the font is not the default. 
 	const setLabelUpStyle = () => {
-		if (!labelUp)
+		if (!labelUp || !node)
 			return 
 
 		const labelEl = node.querySelector('span.mdc-floating-label')
@@ -104,8 +105,69 @@
 		labelEl.classList.add(css(transformLabelToTopLeft()))
 	}
 
+	// Makes the original input invisible and overlay a new text
+	const setInputFile = () => {
+		if (type != 'file' || !node)
+			return
+
+		const rootEl = node.querySelector('label.mdc-text-field')
+		if (!rootEl)
+			return
+		const inputEl = rootEl.querySelector('input')
+		if (!inputEl)
+			return
+
+		inputEl.style.cursor = 'pointer'
+		const div = new DOMParser().parseFromString(`
+			<div style="
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				${isOutlined ? '' : 'border-bottom: 1px solid rgba(0,0,0,.42);'}
+				display: flex;
+				align-items: center;
+			">
+				<span class="file-name" style="
+					padding-left: ${isUnderlined ? 0 : 16}px;
+					padding-top: ${isOutlined ? 0 : 14}px;
+					font-smooth: auto;
+					-moz-osx-font-smoothing: grayscale;
+					-webkit-font-smoothing: antialiased;
+					color: #757575;
+					font-size: ${fontScale}em;
+					text-overflow: ellipsis;
+					overflow: hidden;
+				">
+					${placeholder||''}
+				</span>
+			</div>
+		`, 'text/html')
+		
+		rootEl.insertBefore(div.body.firstChild, inputEl)
+	}
+
+	const updateFile = file => {
+		if (type != 'file' || !node)
+			return 
+
+		const fileNameEl = node.querySelector('span.file-name')
+		if (!fileNameEl)
+			return 
+
+		if (file) {
+			fileNameEl.style.color = 'rgba(0,0,0,.87)'
+			fileNameEl.innerHTML = file.split(/[\\/]/).slice(-1)[0]
+		} else if (placeholder) {
+			fileNameEl.style.color = '#757575'
+			fileNameEl.innerHTML = placeholder
+		}
+	}
+
 	// Creates the CSS style to dynamically animate the label when the text field is outlined. 
 	const setOutlinedLabelStyle = () => {
+		if (!node)
+			return
+
 		// 1. Confirm the DOM is there
 		const mainBox = node.querySelector(`#${_id}`)
 		if (!mainBox)
@@ -317,7 +379,13 @@
 		}
 	`
 
-	const fontStyle = fontScale == 1 ? '' : `
+	const inputStyle = type != 'file' ? '' : `
+		& input {
+			opacity: 0%;
+		}
+	`
+
+	const fontStyle = `
 		& input {
 			font-size: ${fontScale}em;
 		}
@@ -325,6 +393,12 @@
 		& .mdc-floating-label--float-above {
 			font-size: ${fontScale}em !important;
 		}
+
+		${!fontFamily ? '' : `
+		& .mdc-text-field__input, .mdc-floating-label, .mdc-text-field-helper-text {
+			font-family: ${fontFamily} !important;
+		}
+		`}
 	`
 
 	const leadingIconStyle = !leadingIcon ? '' : `
@@ -372,8 +446,8 @@
 		}
 
 		${fontScale <= 1 ? '' : `
-		& .mdc-text-field__input {
-			width: calc(100% - ${iconWidth/2}px);
+		& .mdc-text-field--with-trailing-icon .mdc-text-field__input {
+			padding-right: ${(isUnderlined ? 36 : 48) - 24 + iconWidth}px;
 		}
 		`}
 	`
@@ -433,28 +507,6 @@
 		list-style-type: ${helperTextListStyle};
 	`
 
-	const helperHtmlText = helperText && Array.isArray(helperText) 
-		? helperText.length ? `<ul class=${helperTextClass}>${helperText.map(t => `<li>${t}</li>`).join('')}</ul>` : ''
-		: helperText
-
-	const bordersStyle = getBorders(borders, variant)
-	const widthStyle = getWidth(width)
-	const leadingMDIcon = iconToMaterial(leadingIcon)
-	let trailingMDIcon = getCorrectTrailingIcon(trailingIcon)
-
-	const changePasswordDisplay = () => {
-		if (type != 'password')
-			return
-
-		if (fieldType == 'password') {
-			trailingMDIcon = { ...trailingMDIcon, icon:'visibility_off' }
-			fieldType = 'text'
-		} else {
-			trailingMDIcon = { ...trailingMDIcon, icon:'visibility' }
-			fieldType = 'password'
-		}
-	}
-
 	// This bugs is part of the svelte-material-ui 1.0.0. The borders transitions on focus are not smoothed.
 	const fixOutlinedBorderFlickeringStyle = !isOutlined ? '' : `
 		& .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
@@ -492,9 +544,36 @@
 		}
 	`
 
+	const helperHtmlText = helperText && Array.isArray(helperText) 
+		? helperText.length ? `<ul class=${helperTextClass}>${helperText.map(t => `<li>${t}</li>`).join('')}</ul>` : ''
+		: helperText
+
+	const bordersStyle = getBorders(borders, variant)
+	const widthStyle = getWidth(width)
+	const leadingMDIcon = iconToMaterial(leadingIcon)
+	let trailingMDIcon = getCorrectTrailingIcon(trailingIcon)
+
+	const changePasswordDisplay = () => {
+		if (type != 'password')
+			return
+
+		if (fieldType == 'password') {
+			trailingMDIcon = { ...trailingMDIcon, icon:'visibility_off' }
+			fieldType = 'text'
+		} else {
+			trailingMDIcon = { ...trailingMDIcon, icon:'visibility' }
+			fieldType = 'password'
+		}
+	}
+
+	$: {
+		updateFile(explicitValue)
+	}
+
 	const rootClass = css`
 		${themeStyle}
 		${textStyle}
+		${inputStyle}
 		${fontStyle}
 		${leadingIconStyle}
 		${trailingIconStyle}
@@ -507,6 +586,7 @@
 	`
 
 	onMount(() => {
+		setInputFile()
 		if (isOutlined) {
 			setOutlinedLabelStyle()
 			setOutlinedValue(value)

@@ -45,7 +45,7 @@
 				throw new Error(`Invalid Field ID ${field.id}. Plugin ${field.plugin} not found.`)
 
 			let fieldType = field.type.replace(/^./, m => m.toUpperCase())
-			if (fieldType == 'Textarea' || fieldType == 'Number' || fieldType == 'Date' || fieldType == 'Datetime' || fieldType == 'Password' || fieldType == 'Email')
+			if (fieldType == 'Textarea' || fieldType == 'Number' || fieldType == 'Date' || fieldType == 'Datetime' || fieldType == 'Password' || fieldType == 'Email' || fieldType == 'File')
 				fieldType = 'Text'
 
 			if (!Plugin[fieldType])

@@ -65,6 +65,11 @@
 			}, {
 				...baseTextField,
 				label: 'Hello',
+				fontFamily: 'Times New Roman',
+				helperText: [`label: 'Hello'`, `fontFamily: 'Times New Roman'`]
+			}, {
+				...baseTextField,
+				label: 'Hello',
 				value: 'World',
 				helperText: [`label: 'Hello'`, `value: 'world'`]
 			}, {
@@ -253,9 +258,13 @@
 			}, {
 				...baseTextField,
 				label: 'Hello',
-				width: '100%',
 				maxChar: 15,
-				helperText: [`label: 'Hello'`, `width: 100%`, `maxChar: 15`]
+				helperText: [`label: 'Hello'`, `maxChar: 15`]
+			}, {
+				...baseTextField,
+				label: 'Resume',
+				type: 'file',
+				helperText: [`label: 'Resume'`, `type: 'file'`]
 			}
 		]
 		
