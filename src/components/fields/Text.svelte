@@ -80,7 +80,8 @@
 	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
 	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
 	const animationSuffix = `${labelDenseScale}`.replace('0.','')
-	const transformLabelToTopLeft = x => `transform: ${x === undefined ? '' : `translateX(${x}%)`} translateY(-57%) scale(${labelDenseScale});`
+	const transformLabelToTopLeft = (x, notImportant) => 
+		`transform: ${x === undefined ? '' : `translateX(${x}%)`} translateY(-57%) scale(${labelDenseScale}) ${notImportant ? '' : '!important' };`
 	const description = `text-field-${_id}`
 	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
 	const showHelperTextOnly = helperText && !showMaxChar
@@ -119,7 +120,7 @@
 
 		inputEl.style.cursor = 'pointer'
 		const div = new DOMParser().parseFromString(`
-			<div style="
+			<div class="fake-mdc-text-field__input" style="
 				position: absolute;
 				height: 100%;
 				width: 100%;
@@ -128,7 +129,7 @@
 				align-items: center;
 			">
 				<span class="file-name" style="
-					padding-left: ${isUnderlined ? 0 : 16}px;
+					padding-left: ${isUnderlined || leadingIcon ? 0 : 16}px;
 					padding-top: ${isOutlined ? 0 : 14}px;
 					font-smooth: auto;
 					-moz-osx-font-smoothing: grayscale;
@@ -411,7 +412,7 @@
 				left: ${paddingLabel}px;
 			}
 
-			& .mdc-text-field__input {
+			& .mdc-text-field__input, .fake-mdc-text-field__input {
 				padding-left: ${paddingInput}px !important;
 			}
 		}
@@ -525,21 +526,21 @@
 
 		@keyframes mdc-floating-label-shake-float-above-standard-${animationSuffix} {
 			0% {
-					${transformLabelToTopLeft(0)}
+					${transformLabelToTopLeft(0, true)}
 			}
 
 			33% {
 					animation-timing-function: cubic-bezier(.5, 0, .70173, .49582);
-					${transformLabelToTopLeft(-6)}
+					${transformLabelToTopLeft(-6, true)}
 			}
 
 			66% {
 					animation-timing-function: cubic-bezier(.30244, .38135, .55, .95635);
-					${transformLabelToTopLeft(6)}
+					${transformLabelToTopLeft(6, true)}
 			}
 
 			to {
-					${transformLabelToTopLeft(0)}
+					${transformLabelToTopLeft(0, true)}
 			}
 		}
 	`
