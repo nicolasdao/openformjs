@@ -3,6 +3,7 @@
 	import Form from  './components/Form.svelte'
 	import { getId } from './utils/component.js'
 	import { version } from '../package.json'
+	import './cssPackager.js'
 
 	export let forms = null
 	export let name = 'openform'

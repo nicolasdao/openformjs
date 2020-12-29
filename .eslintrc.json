@@ -10,7 +10,8 @@
         "it": false,
         "xit": false,
         "Buffer": false,
-        "__dirname": false
+        "__dirname": false,
+        "BUNDLE_CSS": false
     },
     "parserOptions": {
         "sourceType": "module",

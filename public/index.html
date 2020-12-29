@@ -306,7 +306,7 @@
 			}
 		]
 		
-		variants.forEach(createTextBasic)
+		const basicForms = variants.map(createTextBasic)
 		variants.forEach(v => createTextFilled(v.filled 
 			? { ...v, variant:'filled', ...v.filled } 
 			: { ...v, variant:'filled' } ))
@@ -314,6 +314,19 @@
 			? { ...v, variant:'outlined', ...v.outlined } 
 			: { ...v, variant:'outlined' } ))
 
+		setTimeout(function() {
+			basicForms[0].$set({ 
+				forms:[{
+					fields: [{
+						...baseTextField,
+						variant: 'outlined',
+						label: 'Helloyo',
+						fontFamily: 'Times New Roman',
+						helperText: [`label: 'Helloyo'`, `fontFamily: 'Times New Roman'`]
+					}]
+				}] 
+			})
+		}, 5000)
 	</script>
 </body>
 </html>

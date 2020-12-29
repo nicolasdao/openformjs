@@ -61,40 +61,30 @@
 	import HelperText from '@smui/textfield/helper-text/index'
 	import Icon from '@smui/textfield/icon/index'
 	import CharacterCounter from '@smui/textfield/character-counter/index'
-	import { css } from '@emotion/css/dist/emotion-css.umd.min.js'
+	// import { css } from '@emotion/css/dist/emotion-css.umd.min.js'
+	import { css } from '@emotion/css/dist/emotion-css.esm.js'
 	import defaultTheme from '../../theme/defaultTheme.js'
 	import { getId } from '../../utils/component.js'
 	import TinyColor from '../../utils/tinyColor'
 	import { paddingParse, iconToMaterial, cornerParse } from '../../utils/converter.js'
 
-	// State values
+	// CONSTANTS
 	const _id = getId()
+	const description = `text-field-${_id}`
+	const state = {}
 	let node
 	
-	const isOutlined = variant == 'outlined'
-	const isUnderlined = !variant || variant == 'underlined'
-	const isFilled = variant == 'filled'
-	const isDate = type == 'datetime' || type == 'date'
-	let explicitValue = isOutlined ? '' : value
-	// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
-	const labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
-	const labelDenseScale = (dense ? 0.8 : 0.75)*labelSizeFactor
-	const animationSuffix = `${labelDenseScale}`.replace('0.','')
-	const transformLabelToTopLeft = (x, notImportant) => 
-		`transform: ${x === undefined ? '' : `translateX(${x}%)`} translateY(-57%) scale(${labelDenseScale}) ${notImportant ? '' : '!important' };`
-	const description = `text-field-${_id}`
-	const showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
-	const showHelperTextOnly = helperText && !showMaxChar
-	let fieldType = isOutlined
-		? (!type || type == 'text' || isDate ? undefined : type)
-		: (!type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type)
-	const labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
-	const cssPadding = paddingParse(padding)
-	// Icon dimensions (default is 24px width)
-	const iconWidth = fontScale <= 1 ? 24 : Math.round(fontScale*24)
+	/* 
+	=======================================================
+	START - FUNCTIONS
+	=======================================================
+	*/
+
+	const transformLabelToTopLeft = (x, scale, notImportant) => 
+		`transform: ${x === undefined || x === null ? '' : `translateX(${x}%)`} translateY(-57%) scale(${scale}) ${notImportant ? '' : '!important' };`
 
 	// Creates the CSS style to resize the label when the text field is not outlined and the font is not the default. 
-	const setLabelUpStyle = () => {
+	const setLabelUpStyle = (labelUp, node, labelDenseScale) => {
 		if (!labelUp || !node)
 			return 
 
@@ -103,11 +93,11 @@
 			return
 
 
-		labelEl.classList.add(css(transformLabelToTopLeft()))
+		labelEl.classList.add(css(transformLabelToTopLeft(null, labelDenseScale)))
 	}
 
 	// Makes the original input invisible and overlay a new text
-	const setInputFile = () => {
+	const setInputFile = ({ type, node, isOutlined, isUnderlined, leadingIcon, fontScale, placeholder }) => {
 		if (type != 'file' || !node)
 			return
 
@@ -135,7 +125,7 @@
 					-moz-osx-font-smoothing: grayscale;
 					-webkit-font-smoothing: antialiased;
 					color: #757575;
-					font-size: ${fontScale}em;
+					font-size: ${fontScale}em !important;
 					text-overflow: ellipsis;
 					overflow: hidden;
 				">
@@ -147,7 +137,11 @@
 		rootEl.insertBefore(div.body.firstChild, inputEl)
 	}
 
-	const updateFile = file => {
+	const getFieldType = ({ type, isOutlined, isDate }) => isOutlined
+		? (!type || type == 'text' || isDate ? undefined : type)
+		: (!type || type == 'text' ? undefined : type == 'datetime' ? 'datetime-local' : type)
+
+	const updateFile = ({file, placeholder, type, node}) => {
 		if (type != 'file' || !node)
 			return 
 
@@ -165,12 +159,12 @@
 	}
 
 	// Creates the CSS style to dynamically animate the label when the text field is outlined. 
-	const setOutlinedLabelStyle = () => {
+	const setOutlinedLabelStyle = ({id, node, labelDenseScale, isDate, labelUp}) => {
 		if (!node)
 			return
 
 		// 1. Confirm the DOM is there
-		const mainBox = node.querySelector(`#${_id}`)
+		const mainBox = node.querySelector(`#${id}`)
 		if (!mainBox)
 			return
 
@@ -232,15 +226,15 @@
 
 	// This hack is needed for outlined text field so the label position can be calculated before the value
 	// is set. Indeed, when the value is set, the label moves.
-	const setOutlinedValue = val => explicitValue = val
+	const setOutlinedValue = (state, val) => state.explicitValue = val
 
 	// This hack is needed for outlined date field so the label position can be calculated before the value
 	// is set. Indeed, when the value is set, the label moves.
-	const setOutlinedDateFieldType = type => {
+	const setOutlinedDateFieldType = (state, type) => {
 		if (type == 'datetime')
-			fieldType = 'datetime-local'
+			state.fieldType = 'datetime-local'
 		else if (type == 'date')
-			fieldType = 'date'
+			state.fieldType = 'date'
 	}
 
 	const getOutlinedLeadingBlockWidth = borders => {
@@ -256,12 +250,12 @@
 		return Math.round(value > height/2 ? height/2 : value)
 	}
 
-	const getBorders = (borders, variant) => {
+	const getBorders = ({borders, isFilled, isOutlined}) => {
 		if (borders === undefined || borders === null)
 			return ''
 
 		const { topLeft, topRight, bottomLeft, bottomRight } = cornerParse(borders)
-		if (variant == 'filled')
+		if (isFilled)
 			return `
 				& label.mdc-text-field {
 					border-radius: ${topLeft}px ${topRight}px 0px 0px;
@@ -315,7 +309,7 @@
 			return ''
 	}
 
-	const getPaddingLabel = () => {
+	const getPaddingLabel = ({leadingIcon, isUnderlined, isFilled, borders, iconWidth}) => {
 		if (!leadingIcon) {
 			if (isUnderlined)
 				return 0 // underlined label with no leading icon starts at 0px.
@@ -338,7 +332,7 @@
 		}
 	}
 
-	const getPaddingInput = () => {
+	const getPaddingInput = ({leadingIcon, isUnderlined, isFilled, borders, iconWidth}) => {
 		if (!leadingIcon) {
 			if (isUnderlined)
 				return 0 // underlined label with no leading icon starts at 0px.
@@ -360,11 +354,7 @@
 		}
 	}
 
-	const paddingLabel = getPaddingLabel()
-	const paddingInput = getPaddingInput()
-
-	const showPasswordVisibilityIcon = type == 'password' && passwordViewable
-	const getCorrectTrailingIcon = icon => {
+	const getCorrectTrailingIcon = (icon, showPasswordVisibilityIcon) => {
 		const trailingMDIcon = iconToMaterial(icon)
 		if (showPasswordVisibilityIcon)
 			return { icon: 'visibility', class: trailingMDIcon ? trailingMDIcon.class : DEFAULT_MATERIAL_ICON_CLASS }
@@ -372,271 +362,318 @@
 			return trailingMDIcon
 	}
 
-	const themeStyle = `
-		--mdc-theme-primary: ${primary};
-		--mdc-theme-error: ${error};
-		& .mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid) .mdc-floating-label {
-			color: ${labelColor};
-		}
-	`
-
-	const inputStyle = type != 'file' ? '' : `
-		& input {
-			opacity: 0%;
-		}
-	`
-
-	const fontStyle = `
-		& input {
-			font-size: ${fontScale}em;
-		}
-
-		& .mdc-floating-label--float-above {
-			font-size: ${fontScale}em !important;
-		}
-
-		${!fontFamily ? '' : `
-		& .mdc-text-field__input, .mdc-floating-label, .mdc-text-field-helper-text {
-			font-family: ${fontFamily} !important;
-		}
-		`}
-	`
-
-	const leadingIconStyle = !leadingIcon ? '' : `
-		& i.mdc-text-field__icon {
-			font-size: ${iconWidth}px;	
-		}
-
-		& .mdc-text-field--with-leading-icon {
-			& .mdc-floating-label {
-				left: ${paddingLabel}px;
-			}
-
-			& .mdc-text-field__input, .fake-mdc-text-field__input {
-				padding-left: ${paddingInput}px !important;
-			}
-		}
-
-		& label > div:first-child {
-			left: 16px;
-			right: auto;
-			position: absolute;
-			height: 100%;
-			width: ${iconWidth}px;
-			display: flex;
-			align-items: center;
-		}
-
-		& label.smui-text-field--standard > div:first-child {
-			left: 0px;
-		}
-
-			& i.mdc-text-field__icon {
-				left: unset !important;
-			right: unset !important;
-			position: unset !important;
-			bottom: unset !important;
-			}
-	`
-
-	const trailingIconStyle = !trailingIcon ? '' : `
-		& .mdc-text-field--with-trailing-icon .mdc-text-field__icon {
-			bottom: unset !important;
-			align-self: center;
-			font-size: ${iconWidth}px;
-		}
-
-		${fontScale <= 1 ? '' : `
-		& .mdc-text-field--with-trailing-icon .mdc-text-field__input {
-			padding-right: ${(isUnderlined ? 36 : 48) - 24 + iconWidth}px;
-		}
-		`}
-	`
-	
-	const heightStyle = `
-		& label.mdc-text-field {
-			height: ${height}px !important;
-		}
-	`
-
-	const textStyle = `
-		& label.mdc-text-field {
-			display: flex;
-		}
-
-		& span.mdc-floating-label {
-			top: unset !important;
-			align-self: center;
-			font-size: ${fontScale}em;
-			line-height: 120%;
-		}
-
-		& .mdc-notched-outline__notch {
-			display:flex;
-			align-items: center;
-			padding-right: 0px !important;
-
-			& span.mdc-floating-label {
-				top: unset !important;
-				font-size: ${fontScale}em;
-				line-height: 120%;
-			}
-		}
-	`
-
-	const paddingStyle = `
-		padding-top: ${cssPadding.top}px;
-		padding-bottom: ${cssPadding.bottom}px;
-		padding-right: ${cssPadding.right}px;
-		padding-left: ${cssPadding.left}px;
-	`
-
-	const passwordSwitchClass = css`
-		width: ${isOutlined ? 48 : 26}px;
-		height: 100%;
-		left: auto;
-		right: 0;
-		position: absolute;
-		cursor: pointer;
-		z-index: 10;
-	`
-
-	const helperTextClass = css`
-		margin: 0px;
-		padding-left: ${helperTextListStyle == 'none' ? '0px' : '1.2em'};
-		margin-top: -1.2em;
-		list-style-type: ${helperTextListStyle};
-	`
-
-	// This bugs is part of the svelte-material-ui 1.0.0. The borders transitions on focus are not smoothed.
-	const fixOutlinedBorderFlickeringStyle = !isOutlined ? '' : `
-		& .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
-			transition: unset !important;
-		}
-	`
-
-	const labelUpStyle = isOutlined ? '' : `
-		& .mdc-floating-label--float-above {
-			${transformLabelToTopLeft()}
-		}
-
-		& .mdc-floating-label--shake {
-			animation: mdc-floating-label-shake-float-above-standard-${animationSuffix} .25s 1 !important;
-		}
-
-		@keyframes mdc-floating-label-shake-float-above-standard-${animationSuffix} {
-			0% {
-					${transformLabelToTopLeft(0, true)}
-			}
-
-			33% {
-					animation-timing-function: cubic-bezier(.5, 0, .70173, .49582);
-					${transformLabelToTopLeft(-6, true)}
-			}
-
-			66% {
-					animation-timing-function: cubic-bezier(.30244, .38135, .55, .95635);
-					${transformLabelToTopLeft(6, true)}
-			}
-
-			to {
-					${transformLabelToTopLeft(0, true)}
-			}
-		}
-	`
-
-	const helperHtmlText = helperText && Array.isArray(helperText) 
-		? helperText.length ? `<ul class=${helperTextClass}>${helperText.map(t => `<li>${t}</li>`).join('')}</ul>` : ''
-		: helperText
-
-	const bordersStyle = getBorders(borders, variant)
-	const widthStyle = getWidth(width)
-	const leadingMDIcon = iconToMaterial(leadingIcon)
-	let trailingMDIcon = getCorrectTrailingIcon(trailingIcon)
-
-	const changePasswordDisplay = () => {
+	const changePasswordDisplay = (state, type) => {
 		if (type != 'password')
 			return
 
-		if (fieldType == 'password') {
-			trailingMDIcon = { ...trailingMDIcon, icon:'visibility_off' }
-			fieldType = 'text'
+		if (state.fieldType == 'password') {
+			state.trailingMDIcon = { ...state.trailingMDIcon, icon:'visibility_off' }
+			state.fieldType = 'text'
 		} else {
-			trailingMDIcon = { ...trailingMDIcon, icon:'visibility' }
-			fieldType = 'password'
+			state.trailingMDIcon = { ...state.trailingMDIcon, icon:'visibility' }
+			state.fieldType = 'password'
+		}
+
+		// force re-render
+		state = { ...state }
+	}
+
+	const setState = (state, options={}) => {
+		state.id = _id
+		state.isOutlined = variant == 'outlined'
+		state.isUnderlined = !variant || variant == 'underlined'
+		state.isFilled = variant == 'filled'
+		state.isDate = type == 'datetime' || type == 'date'
+		// Quadratic and linear equations' parameters found with tool at https://www.dcode.fr/function-equation-finder
+		state.labelSizeFactor = fontScale <= 1  ? 1 : fontScale > 4 ? 0.6 : -0.0413257*fontScale*fontScale-0.00337725*fontScale+1.03947
+		state.labelDenseScale = (dense ? 0.8 : 0.75)*state.labelSizeFactor
+		state.animationSuffix = `${state.labelDenseScale}`.replace('0.','')
+		state.showMaxChar = maxChar !== undefined && maxChar !== null && maxChar > 0
+		state.showHelperTextOnly = helperText && !state.showMaxChar
+		state.labelColor = TinyColor(primary).setAlpha(0.87).toRgbString()
+		state.cssPadding = paddingParse(padding)
+		// Icon dimensions (default is 24px width)
+		state.iconWidth = fontScale <= 1 ? 24 : Math.round(fontScale*24)
+		state.paddingLabel = getPaddingLabel({ leadingIcon, borders, ...state })
+		state.paddingInput = getPaddingInput({ leadingIcon, borders, ...state })
+		state.showPasswordVisibilityIcon = type == 'password' && passwordViewable
+
+		const themeStyle = `
+			--mdc-theme-primary: ${primary};
+			--mdc-theme-error: ${error};
+			& .mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid) .mdc-floating-label {
+				color: ${state.labelColor};
+			}
+		`
+
+		const inputStyle = type != 'file' ? '' : `
+			& input {
+				opacity: 0%;
+			}
+		`
+
+		const fontStyle = `
+			& input {
+				font-size: ${fontScale}em !important;
+			}
+
+			& .mdc-floating-label--float-above {
+				font-size: ${fontScale}em !important;
+			}
+
+			${!fontFamily ? '' : `
+			& .mdc-text-field__input, .mdc-floating-label, .mdc-text-field-helper-text {
+				font-family: ${fontFamily} !important;
+			}
+			`}
+		`
+
+		const leadingIconStyle = !leadingIcon ? '' : `
+			& i.mdc-text-field__icon {
+				font-size: ${state.iconWidth}px !important;	
+			}
+
+			& .mdc-text-field--with-leading-icon {
+				& .mdc-floating-label {
+					left: ${state.paddingLabel}px !important;
+				}
+
+				& .mdc-text-field__input, .fake-mdc-text-field__input {
+					padding-left: ${state.paddingInput}px !important;
+				}
+			}
+
+			& label > div:first-child {
+				left: 16px;
+				right: auto;
+				position: absolute;
+				height: 100%;
+				width: ${state.iconWidth}px;
+				display: flex;
+				align-items: center;
+			}
+
+			& label.smui-text-field--standard > div:first-child {
+				left: 0px;
+			}
+
+				& i.mdc-text-field__icon {
+					left: unset !important;
+				right: unset !important;
+				position: unset !important;
+				bottom: unset !important;
+				}
+		`
+
+		const trailingIconStyle = !trailingIcon ? '' : `
+			& .mdc-text-field--with-trailing-icon .mdc-text-field__icon {
+				bottom: unset !important;
+				align-self: center;
+				font-size: ${state.iconWidth}px !important;
+			}
+
+			${fontScale <= 1 ? '' : `
+			& .mdc-text-field--with-trailing-icon .mdc-text-field__input {
+				padding-right: ${(state.isUnderlined ? 36 : 48) - 24 + state.iconWidth}px;
+			}
+			`}
+		`
+		
+		const heightStyle = `
+			& label.mdc-text-field {
+				height: ${height}px !important;
+			}
+		`
+
+		const textStyle = `
+			& label.mdc-text-field {
+				display: flex;
+			}
+
+			& span.mdc-floating-label {
+				top: unset !important;
+				align-self: center;
+				font-size: ${fontScale}em !important;
+				line-height: 120%;
+			}
+
+			& .mdc-notched-outline__notch {
+				display:flex;
+				align-items: center;
+				padding-right: 0px !important;
+
+				& span.mdc-floating-label {
+					top: unset !important;
+					font-size: ${fontScale}em !important;
+					line-height: 120%;
+				}
+			}
+		`
+
+		const paddingStyle = `
+			padding-top: ${state.cssPadding.top}px;
+			padding-bottom: ${state.cssPadding.bottom}px;
+			padding-right: ${state.cssPadding.right}px;
+			padding-left: ${state.cssPadding.left}px;
+		`
+
+		state.passwordSwitchClass = css`
+			width: ${state.isOutlined ? 48 : 26}px;
+			height: 100%;
+			left: auto;
+			right: 0;
+			position: absolute;
+			cursor: pointer;
+			z-index: 10;
+		`
+
+		const helperTextClass = css`
+			margin: 0px;
+			padding-left: ${helperTextListStyle == 'none' ? '0px' : '1.2em'};
+			margin-top: -1.2em;
+			list-style-type: ${helperTextListStyle};
+		`
+
+		// This bugs is part of the svelte-material-ui 1.0.0. The borders transitions on focus are not smoothed.
+		const fixOutlinedBorderFlickeringStyle = !state.isOutlined ? '' : `
+			& .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+				transition: unset !important;
+			}
+		`
+
+		const labelUpStyle = state.isOutlined ? '' : `
+			& .mdc-floating-label--float-above {
+				${transformLabelToTopLeft(null, state.labelDenseScale)}
+			}
+
+			& .mdc-floating-label--shake {
+				animation: mdc-floating-label-shake-float-above-standard-${state.animationSuffix} .25s 1 !important;
+			}
+
+			@keyframes mdc-floating-label-shake-float-above-standard-${state.animationSuffix} {
+				0% {
+						${transformLabelToTopLeft(0, state.labelDenseScale, true)}
+				}
+
+				33% {
+						animation-timing-function: cubic-bezier(.5, 0, .70173, .49582);
+						${transformLabelToTopLeft(-6, state.labelDenseScale, true)}
+				}
+
+				66% {
+						animation-timing-function: cubic-bezier(.30244, .38135, .55, .95635);
+						${transformLabelToTopLeft(6, state.labelDenseScale, true)}
+				}
+
+				to {
+						${transformLabelToTopLeft(0, state.labelDenseScale, true)}
+				}
+			}
+		`
+
+		state.helperHtmlText = helperText && Array.isArray(helperText) 
+			? helperText.length ? `<ul class=${helperTextClass}>${helperText.map(t => `<li>${t}</li>`).join('')}</ul>` : ''
+			: helperText
+
+		const bordersStyle = getBorders({borders, ...state})
+		const widthStyle = getWidth(width)
+		state.leadingMDIcon = iconToMaterial(leadingIcon)
+		state.fieldType = getFieldType({ type, ...state })
+		state.trailingMDIcon = getCorrectTrailingIcon(trailingIcon, state.showPasswordVisibilityIcon)
+
+		state.rootClass = css`
+			${themeStyle}
+			${textStyle}
+			${inputStyle}
+			${fontStyle}
+			${leadingIconStyle}
+			${trailingIconStyle}
+			${paddingStyle}
+			${bordersStyle}
+			${widthStyle}
+			${heightStyle}
+			${fixOutlinedBorderFlickeringStyle}
+			${labelUpStyle}
+		`
+
+		if (options.init)
+			state.explicitValue = state.isOutlined ? '' : value
+		else {
+			// force re-render
+			updateFile({file:state.explicitValue, placeholder, type, node})
+			state = { ...state }
 		}
 	}
 
+	/* 
+	=======================================================
+	END - FUNCTIONS
+	=======================================================
+	*/
+
+	setState(state, { init:true })
+
+	// COMPUTED
+
+
 	$: {
-		updateFile(explicitValue)
+		console.log(`UPDATE DETECTED FOR ID: ${_id}`)
+		setState(state)
 	}
 
-	const rootClass = css`
-		${themeStyle}
-		${textStyle}
-		${inputStyle}
-		${fontStyle}
-		${leadingIconStyle}
-		${trailingIconStyle}
-		${paddingStyle}
-		${bordersStyle}
-		${widthStyle}
-		${heightStyle}
-		${fixOutlinedBorderFlickeringStyle}
-		${labelUpStyle}
-	`
+	console.log(`INIT ID: ${_id}`)
 
 	onMount(() => {
-		setInputFile()
-		if (isOutlined) {
-			setOutlinedLabelStyle()
-			setOutlinedValue(value)
-			setOutlinedDateFieldType(type)
+		setInputFile({ type, node, leadingIcon, fontScale, placeholder, ...state })
+		if (state.isOutlined) {
+			setOutlinedLabelStyle({node, labelUp, ...state})
+			setOutlinedValue(state, value)
+			setOutlinedDateFieldType(state, type)
 		} else {
-			setLabelUpStyle()
+			setLabelUpStyle(labelUp, node, state.labelDenseScale)
 		}
 	})
 
 </script>
 
-<div class="{rootClass}" bind:this={node}>
+<div class="{state.rootClass}" bind:this={node}>
 	<Textfield
 		id={_id}
-		bind:value={explicitValue}
+		bind:value={state.explicitValue}
 		class="shaped"
 		label={label}
 		invalid={invalid || undefined}
-		variant={variant == 'underlined' ? undefined : variant}
+		variant={state.isUnderlined ? undefined : variant}
 		dense={dense}
-		type={fieldType}
+		type={state.fieldType}
 		withLeadingIcon={leadingIcon ? true : undefined}
 		withTrailingIcon={trailingIcon ? true : undefined}
 		input$name={id}
 		input$placeholder={placeholder || undefined}
-		input$maxlength={showMaxChar ? maxChar : undefined}
+		input$maxlength={state.showMaxChar ? maxChar : undefined}
 		input$step={type == 'number' ? step : undefined}
 		input$aria-controls={description}
 		input$aria-describedby={description}>
-		{#if leadingMDIcon}
+		{#if state.leadingMDIcon}
 			<div>
-				<Icon class="{leadingMDIcon.class}">{leadingMDIcon.icon}</Icon>
+				<Icon class="{state.leadingMDIcon.class}">{state.leadingMDIcon.icon}</Icon>
 			</div>
 		{/if}
 
-		{#if showPasswordVisibilityIcon}
-			<div on:click={changePasswordDisplay} style="display: flex;">
-				<div class="{passwordSwitchClass}"></div>
-				<Icon class="{trailingMDIcon.class}">{trailingMDIcon.icon}</Icon>
+		{#if state.showPasswordVisibilityIcon}
+			<div on:click={() => changePasswordDisplay(type)} style="display: flex;">
+				<div class="{state.passwordSwitchClass}"></div>
+				<Icon class="{state.trailingMDIcon.class}">{state.trailingMDIcon.icon}</Icon>
 			</div>
-		{:else if trailingMDIcon}
-			<Icon class="{trailingMDIcon.class}">{trailingMDIcon.icon}</Icon>
+		{:else if state.trailingMDIcon}
+			<Icon class="{state.trailingMDIcon.class}">{state.trailingMDIcon.icon}</Icon>
 		{/if}
 	</Textfield>
-	{#if showHelperTextOnly}
-		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>{@html helperHtmlText||''}</HelperText>
-	{:else if showMaxChar}
+	{#if state.showHelperTextOnly}
+		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>{@html state.helperHtmlText||''}</HelperText>
+	{:else if state.showMaxChar}
 		<HelperText id={description} persistent={helperTextAlwaysOn ? true : undefined}>
-			{@html helperHtmlText||''}
+			{@html state.helperHtmlText||''}
 			<span slot="character-counter"><CharacterCounter>0 / {maxChar}</CharacterCounter></span>
 		</HelperText>
 	{/if}

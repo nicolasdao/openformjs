@@ -3,13 +3,25 @@ import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
+import replace from '@rollup/plugin-replace'
 // import css from 'rollup-plugin-css-only'
 import json from '@rollup/plugin-json'
 import preprocess from 'svelte-preprocess'
 import postcss from 'rollup-plugin-postcss'
+import fs from 'fs'
 import pkg from './package.json'
 
 const production = !process.env.ROLLUP_WATCH
+
+const BUNDLE_CSS = './public/build/bundle.css'
+let bundleCssExists 
+try {
+	bundleCssExists = fs.existsSync(BUNDLE_CSS)
+} catch (err) {
+	console.log(`INFO: ${err.message}`)
+	bundleCssExists = false
+}
+const bundleCss = bundleCssExists ? fs.readFileSync(BUNDLE_CSS).toString() : ''
 
 function serve() {
 	let server
@@ -44,6 +56,15 @@ export default {
 		format: 'es'
 	}],
 	plugins: [
+		// Set up environment variables
+		replace({
+			process: JSON.stringify({
+				env: {
+					isProd: production,
+					BUNDLE_CSS: bundleCss
+				}
+			})
+		}),
 		svelte({
 			preprocess: preprocess(),
 			compilerOptions: {
@@ -82,12 +103,12 @@ export default {
 				['sass', {
 					includePaths: [
 						'./theme',
-						'./node_modules'
+						'./node_modules',
+						'./public/build'
 					]
 				}]
 			]
 		}),
-
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),
